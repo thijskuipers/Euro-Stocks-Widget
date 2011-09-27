@@ -4,8 +4,8 @@
 // when you're literally copying and using the code, please refer to the author
 
 var debug1; // the debug div
-var url = "table6.csv"; // debug
-var urlStocks="quotes2.csv"; // debug
+var debugChartURL = "http://localhost:8888/New Euro Stocks/table6.csv"; // debug
+var debugStocksURL ="http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 
 // global chart variables
 var horGridPeriod = 1; // 0=year, 1=month, 2=day
@@ -17,6 +17,7 @@ var arrayStocks;
 // global UI variables
 var topbarHeight = 103;
 var frontHeight = 208;
+var backHeight = 250;
 var showPercentage = false;
 
 // global XML request variables
@@ -31,17 +32,20 @@ var responseStocks;
 var busyRequestingStocks=false;
 
 // default preferences
-var Stocks = new Array("AAPL","^AEX","AABA.AS","BABA.AS"); // example: (AAPL,^AEX,AABA.AS)
+var Stocks = new Array("AAPL","^AEX","AABA.AS","^FTSE"); // example: (AAPL,^AEX,AABA.AS)
 var chartPeriod = 1; // 1-7 -> 2w,1m,3m,6m,1y,2y,5y
 var selectedStock = 0; // the index of the selected stock in Stocks
 
 function setup() {
     debug1 = document.getElementById("debug1");
     if (window.widget) {
-        AppleGlassButton(document.getElementById('doneButton'),"Done",hidePrefs);
-        AppleInfoButton(document.getElementById("infoButton"),document.getElementById("front"),"white","white",showPrefs);
+        widget.onshow = onWidgetShow;
+        var doneButton = new AppleGlassButton(document.getElementById('doneButton'),"Done",hidePrefs);
+        var iButton = new AppleInfoButton(document.getElementById("iButton"),document.getElementById("front"),"black","black",showPrefs);
+        window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
     }
     getPrefs();
+    updateCheckbox();
     updateFront();
     // update select list on back
     for (i=0;i<Stocks.length;i++) {
@@ -50,6 +54,26 @@ function setup() {
         newOption.text=Stocks[i].toUpperCase();
         document.getElementById('selectStock').add(newOption,null);
     }
+        
+    // update selection of chartperiod
+    if (chartPeriod!=1) {
+        document.getElementById(("selectPeriodLabel"+chartPeriod)).setAttribute("class","selectedPeriodLabel");
+        document.getElementById(("selectPeriodLabel"+chartPeriod)).removeAttribute("onClick");
+        for (i=1;i<=7;i++)    {
+            if (("selectPeriodLabel"+chartPeriod)!="selectPeriodLabel"+i) {
+                document.getElementById("selectPeriodLabel"+i).setAttribute("class","selectPeriodLabel");
+                document.getElementById("selectPeriodLabel"+i).setAttribute("onClick","selectPeriod(id)");
+            }
+        }
+    }
+    
+    getData();
+    debug1.innerHTML = "setup";
+}
+
+function onWidgetShow() {
+    getData();
+    isItTimeToUpdate();
 }
 
 // update front to reflect number of Stocks
@@ -64,14 +88,25 @@ function updateFront() {
             removeStock(numberOfStocks);
         }
     }
-    getData();
+    // update selection of stock
+    var idnumber = selectedStock + 1;
+    document.getElementById(("stockbar"+idnumber)).setAttribute("class","stockbarselected");
+    document.getElementById(("stockbar"+idnumber)).removeAttribute("onClick");
+    for (i=1;i<=numberOfStocks;i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
+        if (idnumber!=i) {
+            document.getElementById("stockbar"+i).setAttribute("class","stockbar");
+            document.getElementById("stockbarclick"+i).setAttribute("onClick","selectStock(id)");
+        }
+    }    
 }
 
+// retrieve saved preferences, when they're non-existent, do nothing (see defaults above)
 function getPrefs() {
     if (window.widget) {
         var StocksPrefs = widget.preferenceForKey('Stocks');
         var chartPeriodPrefs = widget.preferenceForKey('chartPeriod');
         var selectedStockPrefs = widget.preferenceForKey('selectedStock');
+        var updateAllowed = widget.preferenceForKey('updateAllowed');
         if (StocksPrefs!=undefined) {
             Stocks = StocksPrefs.split(",");
         }
@@ -80,6 +115,9 @@ function getPrefs() {
         }
         if (selectedStockPrefs!=undefined) {
             selectedStock = parseInt(selectedStockPrefs);
+        }
+        if (updateAllowed!=undefined){
+            document.getElementById('updateCheckbox').checked = updateAllowed;
         }
     }
 }
@@ -148,7 +186,10 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.restore();
     
     // array to change the monthnumber to the monthname
-    var monthLabels = new Array("","jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
+    var monthLabels = new Array("","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+    function yearLabel(year) {
+        return "'"+year.slice(year.length-2);
+    }
     
     var xGrid = document.getElementById("horGrid");
     
@@ -160,7 +201,7 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     for (i=0; i<(horizontalLabels.length/2);i++) {
         var addXGrid = document.createElement("div");
          // if the horGridPeriod is in months, change the monthnumber to the monthname
-        addXGrid.innerHTML = (horGridPeriod!=1) ? horizontalLabels[i*2+1] : monthLabels[parseFloat(horizontalLabels[(i*2+1)])];
+        addXGrid.innerHTML = (horGridPeriod!=1) ? (horGridPeriod!=0) ? horizontalLabels[i*2+1] : yearLabel(horizontalLabels[i*2+1]) : monthLabels[parseFloat(horizontalLabels[(i*2+1)])];
         addXGrid.setAttribute("id","xGrid" + i);
         addXGrid.setAttribute("class","horGridLabel");
         addXGrid.setAttribute("style","left:" + horizontalLabels[i*2] + "px;");
@@ -172,8 +213,8 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.lineWidth = 1;
     context.lineJoin = "round";
     context.lineCap = "round";
-    context.shadowBlur = 3;
-    context.shadowOffsetY = 2;
+    context.shadowBlur = 2;
+    context.shadowOffsetY = 1;
     context.beginPath();
     for (i=1;i<numberOfRows;i++) { // from row 2 (0 = first row)
         var j = (i * 7) + closeColumn;
@@ -182,6 +223,7 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
         if (i==1) context.moveTo(xCoord,yCoord);
         else context.lineTo(xCoord,yCoord);
     }
+    context.strokeStyle = "#333333"
     context.stroke();
     context.restore();
     
@@ -206,7 +248,7 @@ function requestChartRates()
         busyRequesting = true;
         reqChart = new XMLHttpRequest();
         reqChart.onreadystatechange = receiveChartRates;
-        reqChart.open("GET", url, true); // url = chartURL
+        reqChart.open("GET", makeChartURL(), true); // url = chartURL
         reqChart.setRequestHeader("Cache-Control", "no-cache");
         reqChart.send("");
     }
@@ -252,7 +294,7 @@ function formatNumber(num,dec) { // num = number to format, dec = number of deci
         num = Math.round(num * factor);
         var numString = String(num);
         var numberOfLeadingZeros = (num==0) ? dec : parseInt(dec - Math.floor(Math.log(num)/Math.log(10)));
-        for (abba=0;abba<numberOfLeadingZeros;abba++) {
+        for (q=0;q<numberOfLeadingZeros;q++) {
             numString = "0" + numString;
         }
         var left = numString.slice(0,(numString.length - dec));
@@ -279,12 +321,13 @@ function selectPeriod(id) {
         }
     }
     chartPeriod = parseInt(id.replace("selectPeriodLabel",""));
-    makeChartURL();
+    //makeChartURL();
     requestChartRates();
+    if (window.widget) widget.setPreferenceForKey(chartPeriod,"chartPeriod");
 }
 
 function selectStock(id) {
-    idnumber = id.replace("stockbarclick","");
+    var idnumber = id.replace("stockbarclick","");
     document.getElementById(("stockbar"+idnumber)).setAttribute("class","stockbarselected");
     document.getElementById(id).removeAttribute("onClick");
     for (i=1;i<=numberOfStocks;i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
@@ -294,7 +337,8 @@ function selectStock(id) {
         }
     }
     selectedStock = idnumber-1;
-    makeChartURL();
+    if (window.widget) widget.setPreferenceForKey(selectedStock,"selectedStock");
+    //makeChartURL();
     requestChartRates();
 }
 
@@ -307,30 +351,44 @@ function makeChartURL() {
         case 1: // 2w
             timeDif = day * 14;
             resolution = "d";
+            horGridPeriod = 2; // 0=year, 1=month, 2=day
+            horGridSkip = 2; // the number of gridlines to skip
             break;
         case 2: // 1m
             timeDif = Math.round(day * 30.4);
             resolution = "d";
+            horGridPeriod = 2; // 0=year, 1=month, 2=day
+            horGridSkip = 4; // the number of gridlines to skip
             break;
         case 3: // 3m
             timeDif = Math.round(day * 91.3);
             resolution = "d";
+            horGridPeriod = 1; // 0=year, 1=month, 2=day
+            horGridSkip = 1; // the number of gridlines to skip
             break;
         case 4: // 6m
             timeDif = Math.round(day * 182.5);
             resolution = "d";
+            horGridPeriod = 1; // 0=year, 1=month, 2=day
+            horGridSkip = 1; // the number of gridlines to skip
             break;
         case 5: // 1y
             timeDif = Math.round(day * 365);
             resolution = "w";
+            horGridPeriod = 1; // 0=year, 1=month, 2=day
+            horGridSkip = 2; // the number of gridlines to skip
             break;
         case 6: // 2y
             timeDif = Math.round(day * 365 * 2);
             resolution = "w";
+            horGridPeriod = 1; // 0=year, 1=month, 2=day
+            horGridSkip = 4; // the number of gridlines to skip
             break;
         case 7: // 5y
             timeDif = Math.round(day * 365 * 5);
             resolution ="w";
+            horGridPeriod = 0; // 0=year, 1=month, 2=day
+            horGridSkip = 1; // the number of gridlines to skip
             break;
     }
     var today  = new Date();
@@ -343,8 +401,9 @@ function makeChartURL() {
     var fromDaysMonth = fromDay.getMonth();
     var fromDaysDay = fromDay.getDate();
     var stockName = encodeURIComponent(Stocks[selectedStock]);
-    chartURL = "http://ichart.yahoo.com/table.csv?s=" + stockName + "&d=" + todaysMonth + "&e=" + todaysDay + "&f=" + todaysYear + "&g=" + resolution + "&a=" + fromDaysMonth + "&b=" + fromDaysDay + "&c=" + fromDaysYear + "&ignore=.csv";
-    debug1.innerHTML = chartURL;
+    var chartURL = "http://ichart.yahoo.com/table.csv?s=" + stockName + "&d=" + todaysMonth + "&e=" + todaysDay + "&f=" + todaysYear + "&g=" + resolution + "&a=" + fromDaysMonth + "&b=" + fromDaysDay + "&c=" + fromDaysYear + "&ignore=.csv";
+    return chartURL;
+    //return debugChartURL;
 }
 
 function addStock() {
@@ -378,6 +437,7 @@ function addStock() {
     newStock.appendChild(newStockChange);
     document.getElementById("topbar").style.height = topbarHeight+"px";
     document.getElementById("front").style.height = frontHeight+"px";
+    window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
     document.getElementById("stockbars").appendChild(newStock);
 }
 
@@ -410,17 +470,18 @@ function removeStock(stockID) {
             topbarHeight-=28;
             frontHeight-=28;
             document.getElementById("topbar").style.height = topbarHeight+"px";
-            document.getElementById("front").style.height = frontHeight+"px";        
+            document.getElementById("front").style.height = frontHeight+"px";
+            window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
         }
     }
 }
 
 function makeStockRateURL() {
-    // http://uk.old.finance.yahoo.com/d/quotes.csv?s=AABA.AS&f=sl1d1t1c1ohgv&e=.csv
     var stringStockNames = Stocks.toString(",");
     var urlStockNames = encodeURIComponent(stringStockNames);
     stocksURL = "http://finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
-    debug1.innerHTML = stocksURL;
+    return stocksURL;
+    //return debugStocksURL;
 }
 
 function requestStockRates()
@@ -430,7 +491,7 @@ function requestStockRates()
         busyRequestingStocks = true;
         reqStocks = new XMLHttpRequest();
         reqStocks.onreadystatechange = receiveStockRates;
-        reqStocks.open("GET", urlStocks, true);
+        reqStocks.open("GET", makeStockRateURL(), true);
         reqStocks.setRequestHeader("Cache-Control", "no-cache");
         reqStocks.send("");
     }
@@ -476,6 +537,7 @@ function parseStockRates() {
         }
         changeClass = (parseFloat(arrayStocks[row+4])<0) ? "stockchangeneg" : "stockchangepos";
         document.getElementById("stockbarchange"+(i+1)).setAttribute("class",changeClass);
+        document.getElementById("stockbarclick"+(i+1)).setAttribute("title","Last update: " + arrayStocks[(row+2)] + " " + arrayStocks[(row+3)] + " E.T.");
     }
 }
 
@@ -497,36 +559,49 @@ function switchChangePercentage() {
     showPercentage = !showPercentage;
 }
 
+function checkStock(value) {
+    document.getElementById('stockFeedback').innerHTML="";
+    var isStock = /^\^?[a-zA-Z]{1,5}(\.[a-zA-Z]{1,4})?$/; // of form ^AEX or AAPL or AABA.AS
+	var result = value.match(isStock);
+	if (!result) document.getElementById('stockFeedback').innerHTML="Code is of wrong format.";
+}
 function addNewStock() {
     var newStock = document.getElementById('stockNameField').value;
     newStock = newStock.toUpperCase();
-    var isStock = /^\^?[a-zA-Z]{1,4}(\.[a-zA-Z]{1,4})?$/; // of form ^AEX or AAPL or AABA.AS
+    var isStock = /^\^?[a-zA-Z]{1,5}(\.[a-zA-Z]{1,4})?$/; // of form ^AEX or AAPL or AABA.AS
 	var result = newStock.match(isStock);
-    if (!result) {
-        debug1.innerHTML="Geen stock ingevuld!"
-    }
-    else {
+    if (result) {
         newOption = new Option();
         newOption.value=newStock.toLowerCase();
         newOption.text=newStock;
         document.getElementById('selectStock').add(newOption,null);
         document.getElementById('stockNameField').value="";
     }
+    else {
+        document.getElementById('stockFeedback').innerHTML="Code is of wrong format.";
+    }
     Stocks = new Array();
     for (i=0;i<document.getElementById('selectStock').length;i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
+    if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),"Stocks");
 }
 
 function removeExistingStock() {
-    for (i=document.getElementById('selectStock').length-1;i>=0;i--) { // remove all selected stocks, starting with the last
-        if (document.getElementById('selectStock').options[i].selected) {
+    // remove all selected stocks, starting with the last
+    for (i=document.getElementById('selectStock').length-1;i>=0;i--) { 
+        if (document.getElementById('selectStock').options[i].selected && document.getElementById('selectStock').length>1) {
             document.getElementById('selectStock').remove(i);
         }
     }
+    if (selectedStock>=document.getElementById('selectStock').length) selectedStock = 0;
     Stocks = new Array();
     for (i=0;i<document.getElementById('selectStock').length;i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    }
+    if (window.widget) {
+        widget.setPreferenceForKey(Stocks.toString(","),"Stocks");
+        widget.setPreferenceForKey(selectedStock,"selectedStock");
     }
 }
 
@@ -550,6 +625,14 @@ function hidePrefs() {
     
     back.style.display="none";
     front.style.display="block";
+    updateFront();
+    getData();
+    
+    document.getElementById('stockFeedback').innerHTML="";
     
     if (window.widget) setTimeout ('widget.performTransition();', 0); 
+}
+
+function openSite(url) {
+    widget.openURL(url);
 }

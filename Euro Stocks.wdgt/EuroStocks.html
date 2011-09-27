@@ -11,6 +11,7 @@
 	<script src="AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
 	<script src="AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
 	<script src="AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
+	<script src="UpdateCode.js" type="text/javascript" charset="utf-8"></script>
 	<style type="text/css" media="screen">
         @import url("EuroStocks.css");
 	</style>
@@ -99,6 +100,7 @@
         </div>
         
         <div id="iButton"></div>
+        <!--input type="submit" name="iButton" value="Prefs" id="iButton" onclick="showPrefs()"-->
     </div>
     
     <div id="back">
@@ -118,16 +120,37 @@
             <div class="c3" id="back_c3"></div>
         </div>
         <div id="backContent">
-                <input type="text" name="stockNameField" value="" id="stockNameField" onchange="addNewStock()">
-                <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()">
-                <select name="selectStock" id="selectStock" multiple="multiple" size="6"></select>
-                <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">
-                <input type="submit" name="makeStockRateURL" value="Update Front!" id="makeStockRateURL" onclick="updateFront()">            
+            <input type="text" name="stockNameField" value="" id="stockNameField" onchange="addNewStock()" onkeyup="checkStock(value)" onclick="document.getElementById('stockNameField').value='';document.getElementById('stockFeedback').innerHTML='';" title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
+            <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()" title="Click Add! or press Enter in the stock code field to add."><br>
+            <div id="stockFeedback"></div>
+            <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"></select>
+            <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">
+            <div id="updateInfo">
+                <div id="updateText">Check for updates: </div>
+                <input type="checkbox" name="updateCheckbox" id="updateCheckbox" checked="checked" onClick="updateCheckbox()"><br>
+                <div id="updateFeedback">This version (1.0alpha) is up to date!</div>
+            </div>
         </div>
+        <img id="yahooURL"src="images/yahoofinancegrey.png" alt="Yahoo Finance" title="Go to Yahoo! Finance UK" onclick="openSite('http://uk.finance.yahoo.com')">
+        <img id="broesURL"src="images/broesurl.png" alt="Broes.nl" title="Go to Broes.nl" onclick="openSite('http://www.broes.nl')">
         <div id="doneButton"></div>
     </div>
+    
+    <div id="updatepanel">
+        <span id="updatetext">An update is available.<br>Go to download page?</span>
+        <div id="updateno" onMouseDown="mouseDownNo()" onMouseUp="doNotUpdate()" onMouseOut="mouseOutNo()">
+            <img id="updatenoimage" src="images/updatepanelno.png" width="54" height="25">
+            <span id="updatenotext">No</span>
+        </div>
+        <div id="updateyes" onMouseDown="mouseDownYes()" onMouseUp="doUpdate()" onMouseOut="mouseOutYes()">
+            <img id="updateyesimage" src="images/updatepanelyes.png" width="54" height="25">
+            <span id="updateyestext">Yes</span>
+        </div>
+    </div>
+    
     <div id="debug1">
         Debugtext
     </div>
+    
 </body>
 </html>

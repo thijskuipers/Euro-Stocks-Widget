@@ -4,8 +4,6 @@
 <dict>
 	<key>AllowNetworkAccess</key>
 	<true/>
-	<key>BackwardsCompatibleClassLookup</key>
-	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Euro Stocks</string>
 	<key>CFBundleIdentifier</key>
@@ -13,9 +11,9 @@
 	<key>CFBundleName</key>
 	<string>Euro Stocks</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0alpha</string>
+	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1.0alpha</string>
+	<string>1.0</string>
 	<key>CloseBoxInsetX</key>
 	<integer>9</integer>
 	<key>CloseBoxInsetY</key>
