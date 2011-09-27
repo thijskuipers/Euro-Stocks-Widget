@@ -88,7 +88,7 @@
 
                 <div id="horGrid"></div>
 
-                <canvas id="chartcanvas" width="189px" height="90px"></canvas>
+                <canvas id="chartcanvas" width="189px" height="100px"></canvas>
                 
             </div>
             
@@ -143,9 +143,9 @@
             <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()"><br>
             
             <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"></select>
-            <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">
-            <input type="submit" name="moveStockDownSubmit" value="Move down" id="moveStockDownSubmit" onClick="moveStockDown()">
-            <input type="submit" name="moveStockUpSubmit" value="Move up" id="moveStockUpSubmit" onClick="moveStockUp()"><br>
+            <input type="submit" name="removeStockSubmit" value="Remove" id="removeStockSubmit" onClick="removeExistingStock()">
+            <input type="submit" name="moveStockUpSubmit" value="Move &#x2191;" id="moveStockUpSubmit" onClick="moveStockUp()"><br>
+            <input type="submit" name="moveStockDownSubmit" value="Move &#x2193;" id="moveStockDownSubmit" onClick="moveStockDown()">
             <div id="updateInfo">
                 <div id="updateText">Check for updates: </div>
                 <input type="checkbox" name="updateCheckbox" id="updateCheckbox" checked="checked" onClick="updateCheckbox()"><br>

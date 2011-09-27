@@ -11,9 +11,9 @@
 	<key>CFBundleName</key>
 	<string>Euro Stocks</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.5</string>
+	<string>1.6</string>
 	<key>CFBundleVersion</key>
-	<string>1.5</string>
+	<string>1.6</string>
 	<key>CloseBoxInsetX</key>
 	<integer>9</integer>
 	<key>CloseBoxInsetY</key>

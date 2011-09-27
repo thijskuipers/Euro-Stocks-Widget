@@ -13,7 +13,7 @@ var reqStocks;
 function makeStockRateURL() {
     var stringStockNames = Stocks.toString(",");
     var urlStockNames = encodeURIComponent(stringStockNames);
-    stocksURL = "http://uk.old.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
+    stocksURL = "http://download.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
     return stocksURL;
     //return debugStocksURL;
 }
@@ -34,10 +34,11 @@ function receiveStockRates()
         if (reqStocks.status == 200)
         {
             parseStockRates(reqStocks.responseText);
+            //console.log(reqStocks.responseText);
         }
         else
         {
-            //debug1.innerHTML = "Error in Stockrates request";
+            console.log("Error in Stockrates request");
         }
     }
 }

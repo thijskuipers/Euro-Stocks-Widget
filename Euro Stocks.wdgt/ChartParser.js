@@ -56,14 +56,14 @@ function drawIntradayChart() {
     }
     
     chartImage.onload = function drawIntradayImage() {
-
+        
         context.save();
-        context.drawImage(chartImage,5,0,187,chartImage.height,2,3,187,90); // source: Image, left, top, width, height; destination: left, top, width, height.
+        context.drawImage(chartImage, 0, 0, chartImage.width, chartImage.height, 1, 3, 187, 90); // source: Image, left, top, width, height; destination: left, top, width, height.
         context.restore();
         
         context.save();
         context.globalCompositeOperation = "darker";
-        context.drawImage(chartBackground,9,45,188,81,1,9,188,81);
+        context.drawImage(chartBackground, 8, 35, 189, 95, 0, 0, 189, 95); // source: Image, left, top, width, height; destination: left, top, width, height.
         context.restore();
         
         // the graph is ready, stop displaying the message, show the graph and labels
@@ -77,7 +77,7 @@ function drawIntradayChart() {
 function makeIntradayChartURL() {
     //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm=" + Math.random();
     var stockName = encodeURIComponent(Stocks[selectedStock]);
-    var intradayChartURL = "http://uk.ichart.yahoo.com/t?s=" + stockName + "&rndm=" + Math.random();
+    var intradayChartURL = "http://ichart.yahoo.com/t?s=" + stockName + "&rndm=" + Math.random();
     return intradayChartURL;
 }
 
@@ -113,16 +113,16 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     canvas.style.display = "block";
 
     // Margins
-    var topMargin=5;
-    var bottomMargin=5;
-    var leftMargin=5;
-    var rightMargin=41;
+    var topMargin = 5;
+    var bottomMargin = 15;
+    var leftMargin = 5;
+    var rightMargin = 41;
 
     var canvasHeight = canvas.offsetHeight - (topMargin + bottomMargin); // real height - vertical margins
     var canvasWidth = canvas.offsetWidth - (leftMargin + rightMargin); // real width - horizontal margin
-    var xStepSize = canvasWidth/(numberOfRows-2); // minus 1 for first row, minus 1 for "pieces in between is one less"
-    var yMin=arrayDateClose[closeColumn+numberOfColumns]; // +numberOfColumns -> from row 2
-    var yMax=arrayDateClose[closeColumn+numberOfColumns];
+    var xStepSize = canvasWidth / (numberOfRows - 2); // minus 1 for first row, minus 1 for "pieces in between is one less"
+    var yMin = arrayDateClose[closeColumn + numberOfColumns]; // +numberOfColumns -> from row 2
+    var yMax = arrayDateClose[closeColumn + numberOfColumns];
     
     // Find minimum and maximum y(rate) value
     for (i=2;i<numberOfRows;i++) { // from third row (0=first row)
@@ -130,18 +130,18 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
         yMin = Math.min(arrayDateClose[j],yMin); // compare current columns with previous column
         yMax = Math.max(arrayDateClose[j],yMax);
     }
-    var yRatio = canvasHeight/(yMax-yMin);
+    var yRatio = canvasHeight / (yMax - yMin);
 
     // start of the canvas
     var context = canvas.getContext("2d");
-    context.clearRect(0,0,(canvasWidth + leftMargin + rightMargin),(canvasHeight + topMargin + bottomMargin)); // canvas leegmaken (met marge)
+    context.clearRect(0, 0, (canvasWidth + leftMargin + rightMargin), (canvasHeight + topMargin + bottomMargin)); // canvas leegmaken (met marge)
     
     // the horizontal grid
     context.save();
-    var yGridStep = canvasHeight/4; // 4 - 1 = number of gridlines
-    for (i=1;i<=3;i++) { // 3 = number of gridlines
-        context.moveTo(leftMargin,i*yGridStep+topMargin);
-        context.lineTo(canvasWidth+leftMargin,i*yGridStep+topMargin);
+    var yGridStep = canvasHeight / 4; // 4 - 1 = number of gridlines
+    for (i = 1; i <= 3; i++) { // 3 = number of gridlines
+        context.moveTo(leftMargin,i * yGridStep + topMargin);
+        context.lineTo(canvasWidth + leftMargin, i * yGridStep + topMargin);
     }
     context.lineWidth = 1;
     context.strokeStyle = "#ccaaaa";
@@ -150,11 +150,11 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     
     // the vertical grid
     context.save();
-    var countXGrid=0;
+    var countXGrid = 0;
     var horizontalLabels = new Array();
     var prevDate = arrayDateClose[(numberOfColumns + dateColumn)].split("-"); // from row 2, split: y-m-d -> y,m,d
     var nextDate = new Array();
-    for (i=2;i<numberOfRows;i++) { // from row three (0 = first row)
+    for (i = 2; i < numberOfRows; i++) { // from row three (0 = first row)
         var j = (i * 7) + dateColumn;
         nextDate = arrayDateClose[j].split("-"); // split: y-m-d -> y,m,d
         // if the y,m or d changes, it's time for a new gridline, but some are skipped
@@ -191,10 +191,10 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     for (i=0; i<(horizontalLabels.length/2);i++) {
         var addXGrid = document.createElement("div");
          // if the horGridPeriod is in months, change the monthnumber to the monthname
-        addXGrid.innerHTML = (horGridPeriod!=1) ? (horGridPeriod!=0) ? horizontalLabels[i*2+1] : yearLabel(horizontalLabels[i*2+1]) : monthLabels[parseFloat(horizontalLabels[(i*2+1)])];
-        addXGrid.setAttribute("id","xGrid" + i);
-        addXGrid.setAttribute("class","horGridLabel");
-        addXGrid.setAttribute("style","left:" + horizontalLabels[i*2] + "px;");
+        addXGrid.innerHTML = (horGridPeriod != 1) ? (horGridPeriod != 0) ? horizontalLabels[i * 2 + 1] : yearLabel(horizontalLabels[i * 2 + 1]) : monthLabels[parseFloat(horizontalLabels[(i * 2 + 1)])];
+        addXGrid.setAttribute("id", "xGrid" + i);
+        addXGrid.setAttribute("class", "horGridLabel");
+        addXGrid.setAttribute("style", "left:" + horizontalLabels[i * 2] + "px;");
         xGrid.appendChild(addXGrid);
     }
     
@@ -206,29 +206,29 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.shadowBlur = 2;
     context.shadowOffsetY = 1;
     context.beginPath();
-    for (i=1;i<numberOfRows;i++) { // from row 2 (0 = first row)
+    for (i = 1; i < numberOfRows; i++) { // from row 2 (0 = first row)
         var j = (i * 7) + closeColumn;
-        var xCoord = canvasWidth - (i-1) * xStepSize + leftMargin;
+        var xCoord = canvasWidth - (i - 1) * xStepSize + leftMargin;
         var yCoord = canvasHeight - (arrayDateClose[j] - yMin) * yRatio + topMargin;
-        if (i==1) context.moveTo(xCoord,yCoord);
-        else context.lineTo(xCoord,yCoord);
+        if (i == 1) context.moveTo(xCoord, yCoord);
+        else context.lineTo(xCoord, yCoord);
     }
     context.strokeStyle = "#333333"
     context.stroke();
     context.restore();
     
     // add the vertical grid labels (they're always in the same place)
-    var yGridStepAbs = (yMax-yMin)/4;
-    document.getElementById("vertGridLabel1").innerHTML = formatNumber(yMax,2);
-    document.getElementById("vertGridLabel2").innerHTML = Math.round((3*yGridStepAbs) + yMin);
-    document.getElementById("vertGridLabel3").innerHTML = Math.round((2*yGridStepAbs) + yMin);
-    document.getElementById("vertGridLabel4").innerHTML = Math.round(yGridStepAbs + yMin);
-    document.getElementById("vertGridLabel5").innerHTML = formatNumber(yMin,2);
+    var yGridStepAbs = (yMax - yMin) / 4;
+    document.getElementById("vertGridLabel1").innerHTML = formatNumber(yMax, 2);
+    document.getElementById("vertGridLabel2").innerHTML = (formatNumber((3 * yGridStepAbs) + yMin, 2).length < 6) ? formatNumber((3 * yGridStepAbs) + yMin, 2) : Math.round((3 * yGridStepAbs) + yMin);
+    document.getElementById("vertGridLabel3").innerHTML = (formatNumber((2 * yGridStepAbs) + yMin, 2).length < 6) ? formatNumber((2 * yGridStepAbs) + yMin, 2) : Math.round((2 * yGridStepAbs) + yMin);
+    document.getElementById("vertGridLabel4").innerHTML = (formatNumber(yGridStepAbs + yMin, 2).length < 6) ? formatNumber(yGridStepAbs + yMin, 2) : Math.round(yGridStepAbs + yMin);
+    document.getElementById("vertGridLabel5").innerHTML = formatNumber(yMin, 2);
     
     // the graph is ready, stop displaying the message, show the graph and labels
     document.getElementById("graphMessage").style.display = "none";
-    document.getElementById('horGrid').style.display="block";
-    document.getElementById('vertGrid').style.display="block";
+    document.getElementById('horGrid').style.display = "block";
+    document.getElementById('vertGrid').style.display = "block";
     document.getElementById('graphDiv').style.visibility = "visible";
 }
 

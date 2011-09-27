@@ -14,7 +14,7 @@ var showRisersFallers = false;
 var widgetID = "";
 
 // default preferences
-var Stocks = new Array("AAPL","^AEX","AABA.AS","^FTSE"); // example: (AAPL,^AEX,AABA.AS)
+var Stocks = new Array("AAPL","^AEX","TOM2.AS","^FTSE"); // example: (AAPL,^AEX,AABA.AS)
 var selectedStock = 0; // the index of the selected stock in Stocks
 var chartPeriod = 1; // 1-7 -> 2w,1m,3m,6m,1y,2y,5y
 var numberOfStocks = 3;
@@ -28,9 +28,9 @@ function setup() {
         widgetID = widget.identifier;
         widget.onshow = onWidgetShow;
         widget.onremove = onWidgetRemoval;
-        var doneButton = new AppleGlassButton(document.getElementById('doneButton'),"Done",hidePrefs);
-        var iButton = new AppleInfoButton(document.getElementById("iButton"),document.getElementById("front"),"black","black",showPrefs);
-        window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
+        var doneButton = new AppleGlassButton(document.getElementById('doneButton'), "Done", hidePrefs);
+        var iButton = new AppleInfoButton(document.getElementById("iButton"), document.getElementById("front"), "black", "black", showPrefs);
+        window.resizeTo(216, parseInt(Math.max(frontHeight, backHeight)));
     }
     // To conform to new WebKit (Leopard), initialize size in HTML and set size in CSS accordingly.
     document.getElementById('chartcanvas').style.width = document.getElementById('chartcanvas').width + "px";
@@ -39,25 +39,25 @@ function setup() {
     updateCheckbox();
     updateFront();
     // update select list on back
-    for (i=0;i<Stocks.length;i++) {
+    for (i=0; i < Stocks.length; i++) {
         var newOption = new Option();
         newOption.value=Stocks[i].toLowerCase();
         newOption.text=Stocks[i].toUpperCase();
-        document.getElementById('selectStock').add(newOption,null);
+        document.getElementById('selectStock').add(newOption, null);
     }
-        
+
     // update selectionlabel of chartperiod
-    if (chartPeriod!=1) {
-        document.getElementById(("selectPeriodLabel"+chartPeriod)).setAttribute("class","selectedPeriodLabel");
-        document.getElementById(("selectPeriodLabel"+chartPeriod)).removeAttribute("onClick");
-        for (i=1;i<=7;i++)    {
-            if (("selectPeriodLabel"+chartPeriod)!="selectPeriodLabel"+i) {
-                document.getElementById("selectPeriodLabel"+i).setAttribute("class","selectPeriodLabel");
-                document.getElementById("selectPeriodLabel"+i).setAttribute("onClick","selectPeriod(id)");
+    if (chartPeriod != 1) {
+        document.getElementById(("selectPeriodLabel" + chartPeriod)).setAttribute("class", "selectedPeriodLabel");
+        document.getElementById(("selectPeriodLabel" + chartPeriod)).removeAttribute("onClick");
+        for (i = 1; i <= 7; i++)    {
+            if (("selectPeriodLabel" + chartPeriod) != ("selectPeriodLabel" + i)) {
+                document.getElementById("selectPeriodLabel" + i).setAttribute("class", "selectPeriodLabel");
+                document.getElementById("selectPeriodLabel" + i).setAttribute("onClick", "selectPeriod(id)");
             }
         }
     }
-    
+
     getData();
 }
 
@@ -69,31 +69,31 @@ function onWidgetShow() {
 function onWidgetRemoval() {
     // remove all associated preferences
     if (window.widget) {
-        widget.setPreferenceForKey(null,("Stocks"+widgetID));
-        widget.setPreferenceForKey(null,("chartPeriod"+widgetID));
-        widget.setPreferenceForKey(null,("selectedStock"+widgetID));
-        widget.setPreferenceForKey(null,("updateAllowed"+widgetID));
-        widget.setPreferenceForKey(null,("showRisersFallers"+widgetID));
-        widget.setPreferenceForKey(null,("showPercentage"+widgetID));
+        widget.setPreferenceForKey(null, ("Stocks" + widgetID));
+        widget.setPreferenceForKey(null, ("chartPeriod" + widgetID));
+        widget.setPreferenceForKey(null, ("selectedStock" + widgetID));
+        widget.setPreferenceForKey(null, ("updateAllowed" + widgetID));
+        widget.setPreferenceForKey(null, ("showRisersFallers" + widgetID));
+        widget.setPreferenceForKey(null, ("showPercentage" + widgetID));
     }
 }
 
 // update front to reflect number of Stocks
 function updateFront() {
-    if (Stocks.length>numberOfStocks) {
-        while (Stocks.length>numberOfStocks) {
+    if (Stocks.length > numberOfStocks) {
+        while (Stocks.length > numberOfStocks) {
             addStock();
         }
     }
     else {
-        while (Stocks.length<numberOfStocks) {
+        while (Stocks.length < numberOfStocks) {
             removeStock(numberOfStocks);
         }
     }
     // update selection of stock
     var idnumber = selectedStock + 1;
-    document.getElementById(("stockbar"+idnumber)).setAttribute("class","stockbarselected");
-    document.getElementById(("stockbar"+idnumber)).removeAttribute("onClick");
+    document.getElementById(("stockbar" + idnumber)).setAttribute("class", "stockbarselected");
+    document.getElementById(("stockbar" + idnumber)).removeAttribute("onClick");
     for (i=1;i<=numberOfStocks;i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
         if (idnumber!=i) {
             document.getElementById("stockbar"+i).setAttribute("class","stockbar");
@@ -329,17 +329,17 @@ function removeExistingStock() {
             document.getElementById('selectStock').remove(i);
         }
     }
-    
+
     if (selectedStock >= document.getElementById('selectStock').length) {
         selectedStock = 0;
     }
-    
+
     Stocks = new Array();
-    
+
     for (i=0;i<document.getElementById('selectStock').length;i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
-    
+
     if (window.widget) {
         widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
         widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
@@ -358,7 +358,7 @@ function moveStockDown() {
         var newMe = new Option();
         newMe.value = me.value;
         newMe.text  = me.text;
-        
+
         document.getElementById('selectStock').add( newMe, afterMe );
         document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
     }
@@ -384,7 +384,7 @@ function moveStockUp() {
         var newMe = new Option();
         newMe.value = me.value;
         newMe.text  = me.text;
-        
+
         document.getElementById('selectStock').add( newMe, beforeMe );
         document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
     }
@@ -403,12 +403,12 @@ function moveStockUp() {
 function showPrefs() {
     var front = document.getElementById("front");
     var back = document.getElementById("back");
-    
+
     if (window.widget) widget.prepareForTransition("ToBack");
-    
+
     front.style.display="none";
     back.style.display="block";
-    
+
     if (window.widget) setTimeout('widget.performTransition();', 0);
 }
 
@@ -417,12 +417,12 @@ function hidePrefs() {
     var back = document.getElementById("back");
 
     if (window.widget) widget.prepareForTransition("ToFront");
-    
+
     back.style.display="none";
     front.style.display="block";
     updateFront();
     getData();
-    
+
     if (window.widget) setTimeout('widget.performTransition();', 0); 
 }
 
