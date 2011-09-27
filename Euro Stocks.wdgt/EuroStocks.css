@@ -772,20 +772,16 @@ body {
 }
 
 #selectStock {
+    float: left;
 	width: 100px;
 	margin: 0;
 	padding: 2px;
 	z-index: 2;
 }
 
-#removeStockSubmit {
-	margin: 0;
-	padding: 2px;
-	z-index: 2;
-}
-
 #updateInfo {
-	display: inline;
+    clear: both;
+	display: block;
 	margin: 0;
 	border-width: 0;
 	z-index: 10;

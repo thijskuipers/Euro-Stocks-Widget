@@ -48,7 +48,7 @@ function drawIntradayChart() {
     var chartBackground = new Image(206,151);
     chartBackground.src = "images/graph_slideout.png";
 
-    var chartImage = new Image(192,96);
+    var chartImage = new Image();
     
     chartImage.onerror = function drawIntradayError() {
         document.getElementById("graphMessage").innerHTML = "Chart not available";
@@ -57,9 +57,8 @@ function drawIntradayChart() {
     
     chartImage.onload = function drawIntradayImage() {
 
-        
         context.save();
-        context.drawImage(chartImage,0,15,188,81,1,9,188,81);
+        context.drawImage(chartImage,5,0,187,chartImage.height,2,3,187,90); // source: Image, left, top, width, height; destination: left, top, width, height.
         context.restore();
         
         context.save();

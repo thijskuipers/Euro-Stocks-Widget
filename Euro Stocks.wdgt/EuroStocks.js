@@ -324,16 +324,76 @@ function addNewStock() {
 
 function removeExistingStock() {
     // remove all selected stocks, starting with the last
-    for (i=document.getElementById('selectStock').length-1;i>=0;i--) { 
+    for (i = document.getElementById('selectStock').length-1; i >= 0; i--) { 
         if (document.getElementById('selectStock').options[i].selected && document.getElementById('selectStock').length>1) {
             document.getElementById('selectStock').remove(i);
         }
     }
-    if (selectedStock>=document.getElementById('selectStock').length) selectedStock = 0;
+    
+    if (selectedStock >= document.getElementById('selectStock').length) {
+        selectedStock = 0;
+    }
+    
     Stocks = new Array();
+    
     for (i=0;i<document.getElementById('selectStock').length;i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
+    
+    if (window.widget) {
+        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
+        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+    }
+}
+
+function moveStockDown() {
+    // move the selected stock down in the list
+    // alert( document.getElementById('selectStock').selectedIndex );
+    // alert( document.getElementById('selectStock').length - 1 );
+
+    if ( document.getElementById('selectStock').selectedIndex < (document.getElementById('selectStock').length - 1) ) {
+        // alert( "hej" );
+        var afterMe = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex + 2 ];
+        var me = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex ];
+        var newMe = new Option();
+        newMe.value = me.value;
+        newMe.text  = me.text;
+        
+        document.getElementById('selectStock').add( newMe, afterMe );
+        document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
+    }
+
+    Stocks = new Array();
+
+    for (i=0;i<document.getElementById('selectStock').length;i++) {
+        Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    }
+
+    if (window.widget) {
+        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
+        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+    }
+}
+
+function moveStockUp() {
+    // move the selected stock up in the list
+
+    if ( document.getElementById('selectStock').selectedIndex > 0 ) {       
+        var beforeMe = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex - 1 ];
+        var me = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex ];
+        var newMe = new Option();
+        newMe.value = me.value;
+        newMe.text  = me.text;
+        
+        document.getElementById('selectStock').add( newMe, beforeMe );
+        document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
+    }
+    Stocks = new Array();
+
+    for (i=0;i<document.getElementById('selectStock').length;i++) {
+        Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    }
+
     if (window.widget) {
         widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
         widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));

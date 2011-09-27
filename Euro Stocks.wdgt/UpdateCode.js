@@ -3,7 +3,7 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var currentVersion = "1.4"; // the current version of the widget
+var currentVersion = "1.5"; // the current version of the widget
 var debugUpdateURL = "http://localhost:8888/New Euro Stocks/version.html";
 var updateURL = "http://widgets.broes.nl/euroStocksVersion.php";
 var reqVersion = false; // The version XML request
