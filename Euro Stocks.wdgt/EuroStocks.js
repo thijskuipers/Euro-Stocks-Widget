@@ -74,6 +74,7 @@ function onWidgetRemoval() {
         widget.setPreferenceForKey(null,("selectedStock"+widgetID));
         widget.setPreferenceForKey(null,("updateAllowed"+widgetID));
         widget.setPreferenceForKey(null,("showRisersFallers"+widgetID));
+        widget.setPreferenceForKey(null,("showPercentage"+widgetID));
     }
 }
 
@@ -107,7 +108,8 @@ function getPrefs() {
         var StocksPrefs = widget.preferenceForKey(("Stocks"+widgetID));
         var chartPeriodPrefs = widget.preferenceForKey(("chartPeriod"+widgetID));
         var selectedStockPrefs = widget.preferenceForKey(("selectedStock"+widgetID));
-        var updateAllowed = widget.preferenceForKey(("updateAllowed"+widgetID));
+        var updateAllowedPrefs = widget.preferenceForKey(("updateAllowed"+widgetID));
+        var showPercentagePrefs = widget.preferenceForKey(("showPercentage"+widgetID));
         if (StocksPrefs!=undefined) {
             Stocks = StocksPrefs.split(",");
         }
@@ -117,17 +119,20 @@ function getPrefs() {
         if (selectedStockPrefs!=undefined) {
             selectedStock = parseInt(selectedStockPrefs);
         }
-        if (updateAllowed!=undefined){
-            document.getElementById('updateCheckbox').checked = updateAllowed;
+        if (updateAllowedPrefs!=undefined) {
+            document.getElementById('updateCheckbox').checked = updateAllowedPrefs;
+        }
+        if (showPercentagePrefs!=undefined) {
+            showPercentage = showPercentagePrefs;
         }
     }
 }
 
 function getData() {
+    requestStockRates();
+
     // build in some code to check whether asking for the RF is of any use.
     var isIndex = (Stocks[selectedStock].charAt(0) == "^");
-    requestStockRates();
-    
     if (isIndex) {
         document.getElementById('switchRfGraph').style.display = "block";
         if (showRisersFallers) {
@@ -296,6 +301,9 @@ function switchChangePercentage() {
             }
         }
         showPercentage = !showPercentage;
+        if (window.widget) {
+            widget.setPreferenceForKey(showPercentage,("showPercentage"+widgetID));
+        }
     }
 }
 

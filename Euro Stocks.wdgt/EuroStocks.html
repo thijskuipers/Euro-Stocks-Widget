@@ -8,9 +8,9 @@
 	<meta name="generator" content="TextMate http://macromates.com/">
 	<meta name="author" content="Broes http://www.broes.nl">
 	<script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
-	<script src="AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
-	<script src="AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
-	<script src="AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
 	<script src="UpdateCode.js" type="text/javascript" charset="utf-8"></script>
 	<script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
@@ -29,22 +29,22 @@
                 <div id="stockbar1" class="stockbarselected">
                     <div id="stockbarclick1" class="stockclick" onClick="selectStock(id)"></div>
                     <div id="stockbarname1" class="stockname">
-                        AAPL
+                        aapl
                     </div>
                     <div id="stockbarvalue1" class="stockvalue">
-                        113.56
+                        187.14
                     </div>
                     <div id="stockbarchange1" class="stockchangepos" onclick="switchChangePercentage()">
-                        12.33
+                        2.05
                     </div>
                 </div>
                 <div id="stockbar2" class="stockbar">
                     <div id="stockbarclick2" class="stockclick" onClick="selectStock(id)"></div>
                     <div id="stockbarname2" class="stockname">
-                        ABN
+                        ^aex
                     </div>
                     <div id="stockbarvalue2" class="stockvalue">
-                        69.22
+                        545.25
                     </div>
                     <div id="stockbarchange2" class="stockchangeneg" onclick="switchChangePercentage()">
                         5.87
@@ -53,13 +53,13 @@
                 <div id="stockbar3" class="stockbar">
                     <div id="stockbarclick3" class="stockclick" onClick="selectStock(id)"></div>
                     <div id="stockbarname3" class="stockname">
-                       ING
+                       aaba.as
                     </div>
                     <div id="stockbarvalue3" class="stockvalue">
-                       227.57
+                       37.68
                     </div>
                     <div id="stockbarchange3" class="stockchangepos" onclick="switchChangePercentage()">
-                       0.66
+                       0.01
                     </div>
                 </div>
             </div>           
@@ -147,7 +147,7 @@
             <div id="updateInfo">
                 <div id="updateText">Check for updates: </div>
                 <input type="checkbox" name="updateCheckbox" id="updateCheckbox" checked="checked" onClick="updateCheckbox()"><br>
-                <div id="updateFeedback">This version (1.2) is up to date!</div>
+                <div id="updateFeedback"></div>
             </div>
         </div>
         <img class="urlLink" id="yahooURL"src="images/yahoofinancegrey.png" alt="Yahoo Finance" title="Go to Yahoo! Finance UK" onclick="openSite('http://uk.finance.yahoo.com')">
