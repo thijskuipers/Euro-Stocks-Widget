@@ -1,4 +1,4 @@
-var currentVersion = "1.1"; // the currentversion of the widget
+var currentVersion = "1.2"; // the current version of the widget
 var debugUpdateURL = "http://localhost:8888/New Euro Stocks/version.html";
 var updateURL = "http://widgets.broes.nl/euroStocksVersion.php";
 var reqVersion = false; // The version XML request

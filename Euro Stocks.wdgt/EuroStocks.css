@@ -347,12 +347,88 @@ body {
 
 /* @end */
 
-/* @group Graph */
+/* @group Graph/Table */
+
+/* @group RF Table */
+
+#rfTableDiv {
+	display: block;
+	position: absolute;
+	width: 184px;
+	height: 103px;
+	margin: 0;
+	padding: 0;
+	left: 11px;
+	z-index: 2;
+	bottom: 12px;
+	border-collapse: collapse;
+	overflow: hidden;
+	visibility: hidden;
+}
+
+#rfButton {
+	display: block;
+	z-index: 5;
+	position: absolute;
+}
+
+#risersFallersTable {
+	margin: 0;
+	padding: 0;
+	font: 10px/1 "Helvetica Neue";
+	border-collapse: collapse;
+	width: 100%;
+}
+
+#risersFallersTable thead {
+	text-align: center;
+	font-weight: bold;
+	font-size: 11px;
+	width: 100%;
+	border-bottom: 1px solid black;
+	padding: 0;
+}
+
+#risersFallersTable thead tr td {
+	padding: 0 0 1px;
+}
+
+#risersFallersTable tbody tr td {
+	padding: 0 3px;
+}
+
+#risersFallersTable * .posChange {
+	border-collapse: collapse;
+	text-align: right;
+	color: green;
+}
+
+#risersFallersTable * .negChange {
+	border-collapse: collapse;
+	text-align: right;
+	color: red;
+}
+
+#risersFallersTable * .oddRow {
+	border-bottom: 1px dotted silver;
+}
+
+#risersFallersTable * .evenRow {
+	border-bottom: 1px dotted silver;
+}
+
+.risersColumn .rightColumn {
+	border-right: 1px solid black;
+}
+
+
+
+/* @end */
 
 #graphMessage {
 	position: absolute;
 	z-index: 5;
-	bottom: 60px;
+	bottom: 51px;
 	left: 28px;
 	width: 145px;
 	height: 23px;
@@ -381,13 +457,14 @@ body {
 #chartcanvas {
 	display: block;
 	position: absolute;
-	width: 152px;
+	width: 189px;
 	height: 90px;
 	margin: 0;
 	padding: 0;
 	left: 8px;
 	z-index: 1;
 	bottom: 26px;
+	background-color: transparent;
 }
 
 /* @group SelectPeriodBar */
@@ -528,6 +605,56 @@ body {
 
 /* @end */
 
+/* @group SwitchRFGraph */
+
+#switchRfGraph {
+	position: absolute;
+	display: block;
+	width: 98px;
+	height: 37px;
+	margin: 0;
+	padding: 0;
+	background: url(images/switch_rf_graph_bkgd.png) no-repeat;
+	bottom: 12px;
+	left: 55px;
+	z-index: 5;
+	visibility: hidden;
+}
+
+#switchRFSelect {
+	display: block;
+	position: absolute;
+	z-index: 5;
+	top: 6px;
+	width: 39px;
+	height: 26px;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	left: 8px;
+	background-image: url(images/switch_rf_select.png);
+	opacity: 0.0;
+}
+
+#switchGraphSelect {
+	display: block;
+	position: absolute;
+	z-index: 5;
+	top: 6px;
+	width: 39px;
+	height: 26px;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	left: 51px;
+	background-image: url(images/switch_graph_select.png);
+	opacity: 1.0;
+}
+
+
+
+/* @end */
+
 /* @end */
 
 /* @end */
@@ -655,15 +782,6 @@ body {
 	margin: 0;
 	padding: 2px;
 	z-index: 2;
-}
-
-#stockFeedback {
-	display: none;
-	margin: 0;
-	padding: 2px;
-	color: white;
-	font: 11px "Helvetica Neue";
-	height: 13px;
 }
 
 #updateInfo {

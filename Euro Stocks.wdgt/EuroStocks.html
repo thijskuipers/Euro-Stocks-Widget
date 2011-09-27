@@ -12,6 +12,9 @@
 	<script src="AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
 	<script src="AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
 	<script src="UpdateCode.js" type="text/javascript" charset="utf-8"></script>
+	<script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
+	<script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
+	<script src="RateParser.js" type="text/javascript" charset="utf-8"></script>
 	<style type="text/css" media="screen">
         @import url("EuroStocks.css");
 	</style>
@@ -64,43 +67,59 @@
         
         <div id="graphslideout" onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()">
             <div id="graphMessage">Message.</div>
-            <div id="selectPeriodBar">
-                <div class="selectedPeriodLabel" id="selectPeriodLabel1">
-                    2w
+            <div id="graphDiv">
+                <div id="selectPeriodBar">
+                    <div class="selectedPeriodLabel" id="selectPeriodLabel1">1d</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel2" onClick="selectPeriod(id)">1m</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel3" onClick="selectPeriod(id)">3m</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel4" onClick="selectPeriod(id)">6m</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel5" onClick="selectPeriod(id)">1y</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel6" onClick="selectPeriod(id)">2y</div>
+                    <div class="selectPeriodLabel" id="selectPeriodLabel7" onClick="selectPeriod(id)">5y</div>
                 </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel2" onClick="selectPeriod(id)">
-                    1m
+                
+                <div id="vertGrid">
+                    <div class="vertGridLabel" id="vertGridLabel1"></div>
+                    <div class="vertGridLabel" id="vertGridLabel2"></div>
+                    <div class="vertGridLabel" id="vertGridLabel3"></div>
+                    <div class="vertGridLabel" id="vertGridLabel4"></div>
+                    <div class="vertGridLabel" id="vertGridLabel5"></div>
                 </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel3" onClick="selectPeriod(id)">
-                    3m
-                </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel4" onClick="selectPeriod(id)">
-                    6m
-                </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel5" onClick="selectPeriod(id)">
-                    1y
-                </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel6" onClick="selectPeriod(id)">
-                    2y
-                </div>
-                <div class="selectPeriodLabel" id="selectPeriodLabel7" onClick="selectPeriod(id)">
-                    5y
-                </div>
+
+                <div id="horGrid"></div>
+
+                <canvas id="chartcanvas"></canvas>
+                
             </div>
             
-            <div class="vertGridLabel" id="vertGridLabel1"></div>
-            <div class="vertGridLabel" id="vertGridLabel2"></div>
-            <div class="vertGridLabel" id="vertGridLabel3"></div>
-            <div class="vertGridLabel" id="vertGridLabel4"></div>
-            <div class="vertGridLabel" id="vertGridLabel5"></div>
+            <div id="switchRfGraph">
+                <div id="switchRFSelect" onclick="switchShowRF()"></div>
+                <div id="switchGraphSelect"></div>
+            </div>
             
-            <div id="horGrid"></div>
             
-            <canvas id="chartcanvas"></canvas>
+            <div id="rfTableDiv">
+                <table id="risersFallersTable">
+                    <colgroup class="risersColumn">
+                        <col class="leftColumn"></col>
+                        <col class="rightColumn"></col>
+                    </colgroup>
+                    <colgroup class="fallersColumn">
+                        <col class="leftColumn"></col>
+                        <col class="rightColumn"></col>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td colspan="2">Risers</td>
+                            <td colspan="2">Fallers</td>
+                        </tr>
+                    </thead>
+                    <tbody id="rfTableBody"></tbody>
+                </table>
+            </div>
         </div>
         
         <div id="iButton"></div>
-        <!--input type="submit" name="iButton" value="Prefs" id="iButton" onclick="showPrefs()"-->
     </div>
     
     <div id="back">
@@ -122,17 +141,17 @@
         <div id="backContent">
             <input type="text" name="stockNameField" value="" id="stockNameField" title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
             <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()"><br>
-            <div id="stockFeedback"></div>
+            
             <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"></select>
             <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">
             <div id="updateInfo">
                 <div id="updateText">Check for updates: </div>
                 <input type="checkbox" name="updateCheckbox" id="updateCheckbox" checked="checked" onClick="updateCheckbox()"><br>
-                <div id="updateFeedback">This version (1.0alpha) is up to date!</div>
+                <div id="updateFeedback">This version (1.2) is up to date!</div>
             </div>
         </div>
-        <img id="yahooURL"src="images/yahoofinancegrey.png" alt="Yahoo Finance" title="Go to Yahoo! Finance UK" onclick="openSite('http://uk.finance.yahoo.com')">
-        <img id="broesURL"src="images/broesurl.png" alt="Broes.nl" title="Go to Broes.nl" onclick="openSite('http://www.broes.nl')">
+        <img class="urlLink" id="yahooURL"src="images/yahoofinancegrey.png" alt="Yahoo Finance" title="Go to Yahoo! Finance UK" onclick="openSite('http://uk.finance.yahoo.com')">
+        <img class="urlLink" id="broesURL"src="images/broesurl.png" alt="Broes.nl" title="Go to Broes.nl" onclick="openSite('http://www.broes.nl')">
         <div id="doneButton"></div>
     </div>
     
