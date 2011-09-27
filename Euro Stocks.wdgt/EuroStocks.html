@@ -120,8 +120,8 @@
             <div class="c3" id="back_c3"></div>
         </div>
         <div id="backContent">
-            <input type="text" name="stockNameField" value="" id="stockNameField" onchange="addNewStock()" onkeyup="checkStock(value)" onclick="document.getElementById('stockNameField').value='';document.getElementById('stockFeedback').innerHTML='';" title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
-            <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()" title="Click Add! or press Enter in the stock code field to add."><br>
+            <input type="text" name="stockNameField" value="" id="stockNameField" title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
+            <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()"><br>
             <div id="stockFeedback"></div>
             <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"></select>
             <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">

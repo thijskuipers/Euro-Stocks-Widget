@@ -1,4 +1,4 @@
-var currentVersion = "1.0"; // the currentversion of the widget
+var currentVersion = "1.1"; // the currentversion of the widget
 var debugUpdateURL = "http://localhost:8888/New Euro Stocks/version.html";
 var updateURL = "http://widgets.broes.nl/euroStocksVersion.php";
 var reqVersion = false; // The version XML request
@@ -8,7 +8,7 @@ var update=false; // Do update yes or no
 function updateCheckbox()
 {
     var updateAllowed = document.getElementById("updateCheckbox").checked;
-    if (widget) widget.setPreferenceForKey(updateAllowed, "updateAllowed");
+    if (widget) widget.setPreferenceForKey(updateAllowed, ("updateAllowed"+widgetID));
     if (!updateAllowed)
     {
         document.getElementById("updateFeedback").innerHTML = "This version: " + currentVersion;

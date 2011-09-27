@@ -19,11 +19,12 @@ var topbarHeight = 103;
 var frontHeight = 208;
 var backHeight = 250;
 var showPercentage = false;
+var widgetID = "";
 
 // global XML request variables
 var chartURL; // the url for the chart data
 var reqChart; // the XMLHttpRequest
-var response; // the XML response
+var response; // the HTTP text response
 var busyRequesting = false;
 
 var stocksURL; // the url for the stock rate data
@@ -39,7 +40,9 @@ var selectedStock = 0; // the index of the selected stock in Stocks
 function setup() {
     debug1 = document.getElementById("debug1");
     if (window.widget) {
+        widgetID = widget.identifier;
         widget.onshow = onWidgetShow;
+        widget.onremove = onWidgetRemoval;
         var doneButton = new AppleGlassButton(document.getElementById('doneButton'),"Done",hidePrefs);
         var iButton = new AppleInfoButton(document.getElementById("iButton"),document.getElementById("front"),"black","black",showPrefs);
         window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
@@ -68,12 +71,21 @@ function setup() {
     }
     
     getData();
-    debug1.innerHTML = "setup";
 }
 
 function onWidgetShow() {
     getData();
     isItTimeToUpdate();
+}
+
+function onWidgetRemoval() {
+    // remove all associated preferences
+    if (window.widget) {
+        widget.setPreferenceForKey(null,("Stocks"+widgetID));
+        widget.setPreferenceForKey(null,("chartPeriod"+widgetID));
+        widget.setPreferenceForKey(null,("selectedStock"+widgetID));
+        widget.setPreferenceForKey(null,("updateAllowed"+widgetID));
+    }
 }
 
 // update front to reflect number of Stocks
@@ -103,10 +115,10 @@ function updateFront() {
 // retrieve saved preferences, when they're non-existent, do nothing (see defaults above)
 function getPrefs() {
     if (window.widget) {
-        var StocksPrefs = widget.preferenceForKey('Stocks');
-        var chartPeriodPrefs = widget.preferenceForKey('chartPeriod');
-        var selectedStockPrefs = widget.preferenceForKey('selectedStock');
-        var updateAllowed = widget.preferenceForKey('updateAllowed');
+        var StocksPrefs = widget.preferenceForKey(("Stocks"+widgetID));
+        var chartPeriodPrefs = widget.preferenceForKey(("chartPeriod"+widgetID));
+        var selectedStockPrefs = widget.preferenceForKey(("selectedStock"+widgetID));
+        var updateAllowed = widget.preferenceForKey(("updateAllowed"+widgetID));
         if (StocksPrefs!=undefined) {
             Stocks = StocksPrefs.split(",");
         }
@@ -323,7 +335,7 @@ function selectPeriod(id) {
     chartPeriod = parseInt(id.replace("selectPeriodLabel",""));
     //makeChartURL();
     requestChartRates();
-    if (window.widget) widget.setPreferenceForKey(chartPeriod,"chartPeriod");
+    if (window.widget) widget.setPreferenceForKey(chartPeriod,("chartPeriod"+widgetID));
 }
 
 function selectStock(id) {
@@ -337,7 +349,7 @@ function selectStock(id) {
         }
     }
     selectedStock = idnumber-1;
-    if (window.widget) widget.setPreferenceForKey(selectedStock,"selectedStock");
+    if (window.widget) widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
     //makeChartURL();
     requestChartRates();
 }
@@ -509,7 +521,7 @@ function receiveStockRates()
         }
         else
         {
-            debug1.innerHTML = "Error in Stockrates request";
+            //debug1.innerHTML = "Error in Stockrates request";
         }
     }
 }
@@ -568,23 +580,16 @@ function checkStock(value) {
 function addNewStock() {
     var newStock = document.getElementById('stockNameField').value;
     newStock = newStock.toUpperCase();
-    var isStock = /^\^?[a-zA-Z]{1,5}(\.[a-zA-Z]{1,4})?$/; // of form ^AEX or AAPL or AABA.AS
-	var result = newStock.match(isStock);
-    if (result) {
-        newOption = new Option();
-        newOption.value=newStock.toLowerCase();
-        newOption.text=newStock;
-        document.getElementById('selectStock').add(newOption,null);
-        document.getElementById('stockNameField').value="";
-    }
-    else {
-        document.getElementById('stockFeedback').innerHTML="Code is of wrong format.";
-    }
+    newOption = new Option();
+    newOption.value=newStock.toLowerCase();
+    newOption.text=newStock;
+    document.getElementById('selectStock').add(newOption,null);
+    document.getElementById('stockNameField').value="";
     Stocks = new Array();
     for (i=0;i<document.getElementById('selectStock').length;i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
-    if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),"Stocks");
+    if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
 }
 
 function removeExistingStock() {
@@ -600,8 +605,8 @@ function removeExistingStock() {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
     if (window.widget) {
-        widget.setPreferenceForKey(Stocks.toString(","),"Stocks");
-        widget.setPreferenceForKey(selectedStock,"selectedStock");
+        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
+        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
     }
 }
 
