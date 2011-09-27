@@ -13,7 +13,7 @@ var reqStocks;
 function makeStockRateURL() {
     var stringStockNames = Stocks.toString(",");
     var urlStockNames = encodeURIComponent(stringStockNames);
-    stocksURL = "http://finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
+    stocksURL = "http://uk.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
     return stocksURL;
     //return debugStocksURL;
 }
@@ -54,6 +54,10 @@ function parseStockRates(responseStocks) {
     var changeClass = "stockchangepos";
     for (i=0;i<least;i++) {
         row = i*9;
+        // remove the (extra) third column when it's "N/A"
+        if (arrayStocks[row+2].match(/^N\/A$/)) {
+            arrayStocks.splice((row+2),1);
+        }
         document.getElementById("stockbarname"+(i+1)).innerHTML=arrayStocks[row];
         document.getElementById("stockbarvalue"+(i+1)).innerHTML=arrayStocks[row+1];
         if (showPercentage) {
@@ -65,6 +69,6 @@ function parseStockRates(responseStocks) {
         }
         changeClass = (parseFloat(arrayStocks[row+4])<0) ? "stockchangeneg" : "stockchangepos";
         document.getElementById("stockbarchange"+(i+1)).setAttribute("class",changeClass);
-        document.getElementById("stockbarclick"+(i+1)).setAttribute("title","Last update: " + arrayStocks[(row+2)] + " " + arrayStocks[(row+3)] + " E.T.");
+        document.getElementById("stockbarclick"+(i+1)).setAttribute("title","Last update: " + arrayStocks[(row+2)] + " " + arrayStocks[(row+3)] + " GMT");
     }
 }

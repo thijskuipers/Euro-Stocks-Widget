@@ -32,6 +32,9 @@ function setup() {
         var iButton = new AppleInfoButton(document.getElementById("iButton"),document.getElementById("front"),"black","black",showPrefs);
         window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
     }
+    // To conform to new WebKit (Leopard), initialize size in HTML and set size in CSS accordingly.
+    document.getElementById('chartcanvas').style.width = document.getElementById('chartcanvas').width + "px";
+    document.getElementById('chartcanvas').style.height = document.getElementById('chartcanvas').height + "px";
     getPrefs();
     updateCheckbox();
     updateFront();

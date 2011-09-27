@@ -255,7 +255,8 @@ body {
 	left: 9px;
 	color: white;
 	text-shadow: #666666 0px -1px 1px;
-	font: bold 13px "Helvetica Neue";
+	font: 14px "Helvetica Neue";
+	text-transform: lowercase;
 }
 
 .stockbarselected {
@@ -270,7 +271,8 @@ body {
 	left: 9px;
 	color: white;
 	text-shadow: #666666 0px -1px 1px;
-	font: bold 13px "Helvetica Neue";
+	font: 14px "Helvetica Neue";
+	text-transform: lowercase;
 }
 
 .stockclick {
@@ -457,8 +459,6 @@ body {
 #chartcanvas {
 	display: block;
 	position: absolute;
-	width: 189px;
-	height: 90px;
 	margin: 0;
 	padding: 0;
 	left: 8px;

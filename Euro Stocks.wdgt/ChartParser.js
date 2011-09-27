@@ -16,7 +16,7 @@ function requestChartRates(chartPeriodInt)
     document.getElementById("graphMessage").innerHTML = "Requesting Chart";
     document.getElementById("graphMessage").style.display = "block";
     document.getElementById("chartcanvas").style.display = "none";
-    document.getElementById("graphDiv").style.visibility = "visible";
+    document.getElementById('graphDiv').style.visibility = "visible";
     document.getElementById('horGrid').style.display="none";
     document.getElementById('vertGrid').style.display="none";
     
@@ -119,12 +119,13 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     var leftMargin=5;
     var rightMargin=41;
 
-    var canvasHeight = canvas.offsetHeight - (topMargin + bottomMargin); // real height(css) -10 (margin)
-    var canvasWidth = canvas.offsetWidth - (leftMargin + rightMargin); // real width(css) -10 (margin)
+    var canvasHeight = canvas.offsetHeight - (topMargin + bottomMargin); // real height - vertical margins
+    var canvasWidth = canvas.offsetWidth - (leftMargin + rightMargin); // real width - horizontal margin
     var xStepSize = canvasWidth/(numberOfRows-2); // minus 1 for first row, minus 1 for "pieces in between is one less"
     var yMin=arrayDateClose[closeColumn+numberOfColumns]; // +numberOfColumns -> from row 2
     var yMax=arrayDateClose[closeColumn+numberOfColumns];
     
+    // Find minimum and maximum y(rate) value
     for (i=2;i<numberOfRows;i++) { // from third row (0=first row)
         var j = (i * numberOfColumns) + closeColumn; // select columns
         yMin = Math.min(arrayDateClose[j],yMin); // compare current columns with previous column
@@ -140,8 +141,8 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.save();
     var yGridStep = canvasHeight/4; // 4 - 1 = number of gridlines
     for (i=1;i<=3;i++) { // 3 = number of gridlines
-        context.moveTo(leftMargin,i*yGridStep+topMargin); // 5 = margin (2*5=10, see above)
-        context.lineTo(canvasWidth+leftMargin,i*yGridStep+topMargin); // 5 = margin
+        context.moveTo(leftMargin,i*yGridStep+topMargin);
+        context.lineTo(canvasWidth+leftMargin,i*yGridStep+topMargin);
     }
     context.lineWidth = 1;
     context.strokeStyle = "#ccaaaa";
