@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>EuroStocks</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Broes http://www.broes.nl">
+	<script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
+	<script src="AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
+	<script src="AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
+	<script src="AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
+	<style type="text/css" media="screen">
+        @import url("EuroStocks.css");
+	</style>
+</head>
+<body onload="setup();">
+    <div id="front">
+        <div id="topbar">
+            <div id="topbartop"></div>
+            <div id="topbarmiddle"></div>
+            <div id="topbarbottom"></div>
+            <div id="stockbars">
+                <div id="stockbar1" class="stockbarselected">
+                    <div id="stockbarclick1" class="stockclick" onClick="selectStock(id)"></div>
+                    <div id="stockbarname1" class="stockname">
+                        AAPL
+                    </div>
+                    <div id="stockbarvalue1" class="stockvalue">
+                        113.56
+                    </div>
+                    <div id="stockbarchange1" class="stockchangepos" onclick="switchChangePercentage()">
+                        12.33
+                    </div>
+                </div>
+                <div id="stockbar2" class="stockbar">
+                    <div id="stockbarclick2" class="stockclick" onClick="selectStock(id)"></div>
+                    <div id="stockbarname2" class="stockname">
+                        ABN
+                    </div>
+                    <div id="stockbarvalue2" class="stockvalue">
+                        69.22
+                    </div>
+                    <div id="stockbarchange2" class="stockchangeneg" onclick="switchChangePercentage()">
+                        5.87
+                    </div>
+                </div>
+                <div id="stockbar3" class="stockbar">
+                    <div id="stockbarclick3" class="stockclick" onClick="selectStock(id)"></div>
+                    <div id="stockbarname3" class="stockname">
+                       ING
+                    </div>
+                    <div id="stockbarvalue3" class="stockvalue">
+                       227.57
+                    </div>
+                    <div id="stockbarchange3" class="stockchangepos" onclick="switchChangePercentage()">
+                       0.66
+                    </div>
+                </div>
+            </div>           
+        </div>
+        
+        <div id="graphslideout" onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()">
+            <div id="graphMessage">Message.</div>
+            <div id="selectPeriodBar">
+                <div class="selectedPeriodLabel" id="selectPeriodLabel1">
+                    2w
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel2" onClick="selectPeriod(id)">
+                    1m
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel3" onClick="selectPeriod(id)">
+                    3m
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel4" onClick="selectPeriod(id)">
+                    6m
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel5" onClick="selectPeriod(id)">
+                    1y
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel6" onClick="selectPeriod(id)">
+                    2y
+                </div>
+                <div class="selectPeriodLabel" id="selectPeriodLabel7" onClick="selectPeriod(id)">
+                    5y
+                </div>
+            </div>
+            
+            <div class="vertGridLabel" id="vertGridLabel1"></div>
+            <div class="vertGridLabel" id="vertGridLabel2"></div>
+            <div class="vertGridLabel" id="vertGridLabel3"></div>
+            <div class="vertGridLabel" id="vertGridLabel4"></div>
+            <div class="vertGridLabel" id="vertGridLabel5"></div>
+            
+            <div id="horGrid"></div>
+            
+            <canvas id="chartcanvas"></canvas>
+        </div>
+        
+        <div id="iButton"></div>
+    </div>
+    
+    <div id="back">
+        <div class="top">
+            <div class="a1" id="back_a1"></div>
+            <div class="a2" id="back_a2"></div>
+            <div class="a3" id="back_a3"></div>
+        </div>
+        <div class="middle">
+            <div class="b1" id="back_b1"></div>
+            <div class="b2" id="back_b2"></div>
+            <div class="b3" id="back_b3"></div>
+        </div>
+        <div class="bottom">
+            <div class="c1" id="back_c1"></div>
+            <div class="c2" id="back_c2"></div>
+            <div class="c3" id="back_c3"></div>
+        </div>
+        <div id="backContent">
+                <input type="text" name="stockNameField" value="" id="stockNameField" onchange="addNewStock()">
+                <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()">
+                <select name="selectStock" id="selectStock" multiple="multiple" size="6"></select>
+                <input type="submit" name="removeStockSubmit" value="Remove!" id="removeStockSubmit" onClick="removeExistingStock()">
+                <input type="submit" name="makeStockRateURL" value="Update Front!" id="makeStockRateURL" onclick="updateFront()">            
+        </div>
+        <div id="doneButton"></div>
+    </div>
+    <div id="debug1">
+        Debugtext
+    </div>
+</body>
+</html>
