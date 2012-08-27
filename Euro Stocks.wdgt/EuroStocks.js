@@ -4,6 +4,7 @@
 // when you're literally copying and using the code, please refer to the author
 
 var debug1; // the debug div
+var debugEnabled = true;
 
 // global UI variables
 var topbarHeight = 103;

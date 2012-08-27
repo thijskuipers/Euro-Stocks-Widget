@@ -6,14 +6,14 @@
 var debugStocksURL ="http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 
 // global request variables
-var stocksURL; // the url for the stock rate data
 var reqStocks;
 
 
 function makeStockRateURL() {
     var stringStockNames = Stocks.toString(",");
     var urlStockNames = encodeURIComponent(stringStockNames);
-    stocksURL = "http://download.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
+    var stocksURL = "http://download.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
+
     return stocksURL;
     //return debugStocksURL;
 }
@@ -34,42 +34,72 @@ function receiveStockRates()
         if (reqStocks.status == 200)
         {
             parseStockRates(reqStocks.responseText);
-            //console.log(reqStocks.responseText);
+            if (debugEnabled) {
+                // console.log(reqStocks.responseText);
+            }
         }
         else
         {
-            console.log("Error in Stockrates request");
+            if (debugEnabled) {
+                console.log("Error in Stockrates request");
+            }
         }
     }
 }
 
 function parseStockRates(responseStocks) {
-    responseStocks = responseStocks.replace(/\r\n|\n/gi,","); // replace line breaks by comma's
-    arrayStocks = responseStocks.split(","); // split the file into an array by comma's
-    for (x in arrayStocks) {
-        arrayStocks[x] = arrayStocks[x].replace(/\"/gi,""); // remove quotes
-    }
-    var arrayStocksRows = Math.floor(arrayStocks.length/9);
-    var least = Math.min(arrayStocksRows,numberOfStocks);
-    var row;
-    var changeClass = "stockchangepos";
-    for (i=0;i<least;i++) {
-        row = i*9;
-        // remove the (extra) third column when it's "N/A"
-        if (arrayStocks[row+2].match(/^N\/A$/)) {
-            arrayStocks.splice((row+2),1);
+    var dataRows = responseStocks.split(/\r\n|\n/gi); // split response text by line endings into array
+    console.log("rows: " + dataRows.length);
+    
+    for (var i = 0, len = dataRows.length; i < len; i++) {
+        dataRows[i] = dataRows[i].split(","); // split each line by comma into array
+        
+        for (var j = 0, jLen = dataRows[i].length; j < jLen; j++) {
+            dataRows[i][j] = dataRows[i][j].replace(/\"/gi,""); // remove quotes for each line in field
         }
-        document.getElementById("stockbarname"+(i+1)).innerHTML=arrayStocks[row];
-        document.getElementById("stockbarvalue"+(i+1)).innerHTML=arrayStocks[row+1];
+        
+        console.log("row[" + i + "].length: " + dataRows[i].length);
+    }
+    
+    // Remove empty entries from the array.
+    // An entry is empty when it contains less than two values.
+    // Using a reverse for-loop, we can remove each empty entry without changing the index
+    for (var i = dataRows.length - 1; i >= 0; i--){
+        if(dataRows[i].length < 2) {
+            dataRows.splice(i, 1); // remove the entry
+        }
+    }
+    
+    console.log("dataRows.length after pruning: " + dataRows.length);
+
+    var least = Math.min(dataRows.length, numberOfStocks);
+    console.log("least: " + least);
+    
+    var changeClass = "stockchangepos";
+    
+    for (var i = 0; i < least; i++) {
+        // Name: 0
+        // Value: 1
+        // Date: 2
+        // Time: 3
+        // Change: 4
+        // Open: 5
+        // High: 6
+        // Low: 7
+        // Volume: 8
+        var row = dataRows[i];
+        console.log(row[0] + ": " + row[1]);
+        document.getElementById("stockbarname" + (i + 1)).innerHTML = row[0];
+        document.getElementById("stockbarvalue" + (i + 1)).innerHTML = row[1];
         if (showPercentage) {
-            percentage = arrayStocks[row+4] / (arrayStocks[row+1] - arrayStocks[row+4]) * 100;
-            document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(percentage,2) + '%';
+            percentage = row[4] / (row[1] - row[4]) * 100;
+            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(percentage, 2) + '%';
         }
         else {
-            document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(arrayStocks[row+4],2);
+            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(row[4], 2);
         }
-        changeClass = (parseFloat(arrayStocks[row+4])<0) ? "stockchangeneg" : "stockchangepos";
-        document.getElementById("stockbarchange"+(i+1)).setAttribute("class",changeClass);
-        document.getElementById("stockbarclick"+(i+1)).setAttribute("title","Last update: " + arrayStocks[(row+2)] + " " + arrayStocks[(row+3)] + " GMT");
+        changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
+        document.getElementById("stockbarchange" + ( i + 1)).setAttribute("class", changeClass);
+        document.getElementById("stockbarclick" + (i + 1)).setAttribute("title", "Last update: " + row[2] + " " + row[3] + " GMT");
     }
 }
