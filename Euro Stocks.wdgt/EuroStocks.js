@@ -26,6 +26,8 @@ var stocksDataRows;
 
 function setup() {
     debug1 = document.getElementById("debug1");
+
+    // Only perform these setup steps when it's a widget
     if (window.widget) {
         widgetID = widget.identifier;
         widget.onshow = onWidgetShow;
@@ -34,26 +36,32 @@ function setup() {
         var iButton = new AppleInfoButton(document.getElementById("iButton"), document.getElementById("front"), "black", "black", showPrefs);
         window.resizeTo(216, parseInt(Math.max(frontHeight, backHeight)));
     }
+
     // To conform to new WebKit (Leopard), initialize size in HTML and set size in CSS accordingly.
-    document.getElementById('chartcanvas').style.width = document.getElementById('chartcanvas').width + "px";
-    document.getElementById('chartcanvas').style.height = document.getElementById('chartcanvas').height + "px";
+    var canvasEl = document.getElementById('chartcanvas');
+    canvasEl.style.width = canvasEl.width + "px";
+    canvasEl.style.height = canvasEl.height + "px";
+
     getPrefs();
     updateCheckbox();
     updateFront();
+
     // update select list on back
-    for (i=0; i < Stocks.length; i++) {
+    for (var i = 0; i < Stocks.length; i++) {
         var newOption = new Option();
         newOption.value=Stocks[i].toLowerCase();
         newOption.text=Stocks[i].toUpperCase();
         document.getElementById('selectStock').add(newOption, null);
     }
 
-    // update selectionlabel of chartperiod
+    // update selectionlabel of chart period
     if (chartPeriod != 1) {
         document.getElementById(("selectPeriodLabel" + chartPeriod)).setAttribute("class", "selectedPeriodLabel");
         document.getElementById(("selectPeriodLabel" + chartPeriod)).removeAttribute("onClick");
+        
+        // reset all css classes for the chart periods
         for (i = 1; i <= 7; i++)    {
-            if (("selectPeriodLabel" + chartPeriod) != ("selectPeriodLabel" + i)) {
+            if (chartPeriod != i) {
                 document.getElementById("selectPeriodLabel" + i).setAttribute("class", "selectPeriodLabel");
                 document.getElementById("selectPeriodLabel" + i).setAttribute("onClick", "selectPeriod(id)");
             }
@@ -96,10 +104,10 @@ function updateFront() {
     var idnumber = selectedStock + 1;
     document.getElementById(("stockbar" + idnumber)).setAttribute("class", "stockbarselected");
     document.getElementById(("stockbar" + idnumber)).removeAttribute("onClick");
-    for (i=1;i<=numberOfStocks;i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
-        if (idnumber!=i) {
-            document.getElementById("stockbar"+i).setAttribute("class","stockbar");
-            document.getElementById("stockbarclick"+i).setAttribute("onClick","selectStock(id)");
+    for (i = 1; i <= numberOfStocks; i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
+        if (idnumber != i) {
+            document.getElementById("stockbar" + i).setAttribute("class","stockbar");
+            document.getElementById("stockbarclick" + i).setAttribute("onClick","selectStock(id)");
         }
     }    
 }
@@ -157,7 +165,7 @@ function getData() {
 
 
 
-function formatNumber(num,dec) { // num = number to format, dec = number of decimals
+function formatNumber(num, dec) { // num = number to format, dec = number of decimals
     if (isNaN(num)) {
         return "N/A";
     }
@@ -191,63 +199,63 @@ function mouseOutGraph() {
 function selectPeriod(id) {
     document.getElementById(id).setAttribute("class","selectedPeriodLabel");
     document.getElementById(id).removeAttribute("onClick");
-    for (i=1;i<=7;i++)    {
-        if (id!="selectPeriodLabel"+i) {
-            document.getElementById("selectPeriodLabel"+i).setAttribute("class","selectPeriodLabel");
-            document.getElementById("selectPeriodLabel"+i).setAttribute("onClick","selectPeriod(id)");
+    for (i = 1; i <= 7; i++)    {
+        if (id != "selectPeriodLabel" + i) {
+            document.getElementById("selectPeriodLabel" + i).setAttribute("class", "selectPeriodLabel");
+            document.getElementById("selectPeriodLabel" + i).setAttribute("onClick", "selectPeriod(id)");
         }
     }
-    chartPeriod = parseInt(id.replace("selectPeriodLabel",""));
+    chartPeriod = parseInt(id.replace("selectPeriodLabel", ""));
     requestChartRates(chartPeriod);
-    if (window.widget) widget.setPreferenceForKey(chartPeriod,("chartPeriod"+widgetID));
+    if (window.widget) widget.setPreferenceForKey(chartPeriod,("chartPeriod" + widgetID));
 }
 
 function selectStock(id) {
-    var idnumber = id.replace("stockbarclick","");
-    document.getElementById(("stockbar"+idnumber)).setAttribute("class","stockbarselected");
-    for (i=1;i<=numberOfStocks;i++) {
-        if (idnumber!=i) {
-            document.getElementById("stockbar"+i).setAttribute("class","stockbar");
-            document.getElementById("stockbarclick"+i).setAttribute("onClick","selectStock(id)");
+    var idnumber = id.replace("stockbarclick", "");
+    document.getElementById(("stockbar" + idnumber)).setAttribute("class", "stockbarselected");
+    for (i = 1; i <= numberOfStocks; i++) {
+        if (idnumber != i) {
+            document.getElementById("stockbar" + i).setAttribute("class", "stockbar");
+            document.getElementById("stockbarclick" + i).setAttribute("onClick", "selectStock(id)");
         }
     }
-    selectedStock = idnumber-1;
-    if (window.widget) widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+    selectedStock = idnumber - 1;
+    if (window.widget) widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
     getData();
 }
 
 function addStock() {
     numberOfStocks++;
-    topbarHeight+=28;
-    frontHeight+=28;
+    topbarHeight += 28;
+    frontHeight += 28;
     var newStock = document.createElement("div");
     var newStockClick = document.createElement("div");
     var newStockName = document.createElement("div");
     var newStockValue = document.createElement("div");
     var newStockChange = document.createElement("div");
-    newStock.setAttribute("class","stockbar");
-    newStock.setAttribute("id","stockbar"+numberOfStocks);
-    newStock.setAttribute("style","top:"+(6+(numberOfStocks-1)*28)+"px");
-    newStockClick.setAttribute("class","stockclick");
-    newStockClick.setAttribute("id","stockbarclick"+numberOfStocks);
-    newStockClick.setAttribute("onclick","selectStock(id)");
-    newStockName.setAttribute("class","stockname");
-    newStockName.setAttribute("id","stockbarname"+numberOfStocks);
+    newStock.setAttribute("class", "stockbar");
+    newStock.setAttribute("id","stockbar" + numberOfStocks);
+    newStock.setAttribute("style","top:" + (6 + (numberOfStocks - 1) * 28) + "px");
+    newStockClick.setAttribute("class", "stockclick");
+    newStockClick.setAttribute("id", "stockbarclick" + numberOfStocks);
+    newStockClick.setAttribute("onclick", "selectStock(id)");
+    newStockName.setAttribute("class", "stockname");
+    newStockName.setAttribute("id", "stockbarname" + numberOfStocks);
     newStockName.innerHTML = "TEMP";
-    newStockValue.setAttribute("class","stockvalue");
-    newStockValue.setAttribute("id","stockbarvalue"+numberOfStocks);
+    newStockValue.setAttribute("class", "stockvalue");
+    newStockValue.setAttribute("id", "stockbarvalue" + numberOfStocks);
     newStockValue.innerHTML = "100.00";
-    newStockChange.setAttribute("class","stockchangepos");
-    newStockChange.setAttribute("id","stockbarchange"+numberOfStocks);
-    newStockChange.setAttribute("onclick","switchChangePercentage()");
+    newStockChange.setAttribute("class", "stockchangepos");
+    newStockChange.setAttribute("id", "stockbarchange" + numberOfStocks);
+    newStockChange.setAttribute("onclick", "switchChangePercentage()");
     newStockChange.innerHTML = "10.00";
     newStock.appendChild(newStockClick);
     newStock.appendChild(newStockName);
     newStock.appendChild(newStockValue);
     newStock.appendChild(newStockChange);
-    document.getElementById("topbar").style.height = topbarHeight+"px";
-    document.getElementById("front").style.height = frontHeight+"px";
-    window.resizeTo(216,parseInt(Math.max(frontHeight,backHeight)));
+    document.getElementById("topbar").style.height = topbarHeight + "px";
+    document.getElementById("front").style.height = frontHeight + "px";
+    window.resizeTo(216, parseInt(Math.max(frontHeight, backHeight)));
     document.getElementById("stockbars").appendChild(newStock);
 }
 
@@ -371,27 +379,30 @@ function addNewStock() {
     if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
 }
 
+
 function removeExistingStock() {
     // remove all selected stocks, starting with the last
-    for (i = document.getElementById('selectStock').length-1; i >= 0; i--) { 
-        if (document.getElementById('selectStock').options[i].selected && document.getElementById('selectStock').length>1) {
-            document.getElementById('selectStock').remove(i);
+    var selectStockEl = document.getElementById('selectStock');
+
+    for (i = selectStockEl.length - 1; i >= 0; i--) { 
+        if (selectStockEl.options[i].selected && selectStockEl.length > 1) {
+            selectStockEl.remove(i);
         }
     }
 
-    if (selectedStock >= document.getElementById('selectStock').length) {
+    if (selectedStock >= selectStockEl.length) {
         selectedStock = 0;
     }
 
     Stocks = new Array();
 
-    for (i=0;i<document.getElementById('selectStock').length;i++) {
-        Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    for (i = 0; i < selectStockEl.length; i++) {
+        Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
     if (window.widget) {
-        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
-        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+        widget.setPreferenceForKey(Stocks.toString(","), ("Stocks" + widgetID));
+        widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
     }
 }
 
@@ -399,28 +410,30 @@ function moveStockDown() {
     // move the selected stock down in the list
     // alert( document.getElementById('selectStock').selectedIndex );
     // alert( document.getElementById('selectStock').length - 1 );
-
-    if ( document.getElementById('selectStock').selectedIndex < (document.getElementById('selectStock').length - 1) ) {
+    
+    var selectStockEl = document.getElementById('selectStock');
+    
+    if (selectStockEl.selectedIndex < selectStockEl.length - 1) {
         // alert( "hej" );
-        var afterMe = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex + 2 ];
-        var me = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex ];
+        var afterMe = selectStockEl.options[selectStockEl.selectedIndex + 2];
+        var me = selectStockEl.options[selectStockEl.selectedIndex];
         var newMe = new Option();
         newMe.value = me.value;
         newMe.text  = me.text;
 
-        document.getElementById('selectStock').add( newMe, afterMe );
-        document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
+        selectStockEl.add(newMe, afterMe);
+        selectStockEl.remove(selectStockEl.selectedIndex);
     }
 
     Stocks = new Array();
 
-    for (i=0;i<document.getElementById('selectStock').length;i++) {
-        Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    for (i = 0; i < selectStockEl.length; i++) {
+        Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
     if (window.widget) {
-        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
-        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+        widget.setPreferenceForKey(Stocks.toString(","), ("Stocks" + widgetID));
+        widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
     }
 }
 
@@ -459,7 +472,9 @@ function showPrefs() {
     front.style.display = "none";
     back.style.display = "block";
 
-    if (window.widget) setTimeout('widget.performTransition();', 0);
+    if (window.widget) setTimeout(function () {
+        widget.performTransition();
+    }, 0);
 }
 
 function hidePrefs() {
@@ -473,7 +488,9 @@ function hidePrefs() {
     updateFront();
     getData();
 
-    if (window.widget) setTimeout('widget.performTransition();', 0); 
+    if (window.widget) setTimeout(function () {
+        widget.performTransition()
+    }, 0); 
 }
 
 function openSite(url) {
