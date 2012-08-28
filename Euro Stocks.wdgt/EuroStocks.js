@@ -22,6 +22,7 @@ var numberOfStocks = 3;
 
 // global data containers
 var arrayStocks;
+var stocksDataRows;
 
 function setup() {
     debug1 = document.getElementById("debug1");
@@ -286,26 +287,73 @@ function removeStock(stockID) {
 }
 
 function switchChangePercentage() {
-    if (arrayStocks) {
-        var arrayStocksRows = Math.floor(arrayStocks.length/9);
-        var least = Math.min(arrayStocksRows,numberOfStocks);
-        var percentage;
-        var row;
-        for (i=0;i<least;i++) {
-            row = i*9;
-            if (!showPercentage) {
-                percentage = (arrayStocks[row+4]==0.0) ? 0 : arrayStocks[row+4] / (arrayStocks[row+1] - arrayStocks[row+4]) * 100;
-                document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(percentage,2) + '%';
-            }
-            else {
-                document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(arrayStocks[row+4],2);
-            }
-        }
-        showPercentage = !showPercentage;
-        if (window.widget) {
-            widget.setPreferenceForKey(showPercentage,("showPercentage"+widgetID));
-        }
+    if (debugEnabled) {
+        console.log("switchChangePercentage");
     }
+    
+    showPercentage = !showPercentage;
+    if (window.widget) {
+        widget.setPreferenceForKey(showPercentage,("showPercentage"+widgetID));
+    }
+    
+    // Create local variable pointing to global stocks data array
+    var dataRows = stocksDataRows;
+    
+    if (!dataRows) {
+        console.log("no data, returning...");
+        return;
+    }
+    
+    var least = Math.min(dataRows.length, numberOfStocks);
+    if (debugEnabled) {
+        console.log("least: " + least);
+    }
+    
+    var changeClass = "stockchangepos";
+    var percentage = 0.0;
+    
+    for (var i = 0; i < least; i++) {
+        // Name: 0
+        // Value: 1
+        // Date: 2
+        // Time: 3
+        // Change: 4
+        // Open: 5
+        // High: 6
+        // Low: 7
+        // Volume: 8
+        var row = dataRows[i];
+        var changeEl = document.getElementById("stockbarchange" + (i + 1));
+        if (debugEnabled) {
+            console.log(row[0] + ": " + row[1]);
+        }
+        if (showPercentage) {
+            percentage = row[4] / (row[1] - row[4]) * 100;
+            changeEl.innerHTML = formatNumber(percentage, 2) + '%';
+        }
+        else {
+            changeEl.innerHTML = formatNumber(row[4], 2);
+        }
+        changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
+        changeEl.setAttribute("class", changeClass);
+    }
+
+    // if (arrayStocks) {
+    //     var arrayStocksRows = Math.floor(arrayStocks.length/9);
+    //     var least = Math.min(arrayStocksRows,numberOfStocks);
+    //     var percentage;
+    //     var row;
+    //     for (i=0;i<least;i++) {
+    //         row = i*9;
+    //         if (!showPercentage) {
+    //             percentage = (arrayStocks[row+4]==0.0) ? 0 : arrayStocks[row+4] / (arrayStocks[row+1] - arrayStocks[row+4]) * 100;
+    //             document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(percentage,2) + '%';
+    //         }
+    //         else {
+    //             document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(arrayStocks[row+4],2);
+    //         }
+    //     }
+    // }
 }
 
 function addNewStock() {
@@ -378,26 +426,27 @@ function moveStockDown() {
 
 function moveStockUp() {
     // move the selected stock up in the list
-
-    if ( document.getElementById('selectStock').selectedIndex > 0 ) {       
-        var beforeMe = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex - 1 ];
-        var me = document.getElementById('selectStock').options[ document.getElementById('selectStock').selectedIndex ];
+    var selectStockEl = document.getElementById('selectStock');
+    var selectedIndex = selectStockEl.selectedIndex;
+    if ( selectedIndex > 0 ) {       
+        var beforeMe = selectStockEl.options[selectedIndex - 1];
+        var me = selectStockEl.options[selectedIndex];
         var newMe = new Option();
         newMe.value = me.value;
         newMe.text  = me.text;
 
-        document.getElementById('selectStock').add( newMe, beforeMe );
-        document.getElementById('selectStock').remove( document.getElementById('selectStock').selectedIndex );
+        selectStockEl.add(newMe, beforeMe);
+        selectStockEl.remove(selectedIndex);
     }
     Stocks = new Array();
 
-    for (i=0;i<document.getElementById('selectStock').length;i++) {
-        Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
+    for (i = 0, len = selectStockEl.length ; i < len; i++) {
+        Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
     if (window.widget) {
-        widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
-        widget.setPreferenceForKey(selectedStock,("selectedStock"+widgetID));
+        widget.setPreferenceForKey(Stocks.toString(","), ("Stocks" + widgetID));
+        widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
     }
 }
 
@@ -407,8 +456,8 @@ function showPrefs() {
 
     if (window.widget) widget.prepareForTransition("ToBack");
 
-    front.style.display="none";
-    back.style.display="block";
+    front.style.display = "none";
+    back.style.display = "block";
 
     if (window.widget) setTimeout('widget.performTransition();', 0);
 }
@@ -433,7 +482,7 @@ function openSite(url) {
 
 function switchShowRF() {
     showRisersFallers = !showRisersFallers;
-    if (window.widget) widget.setPreferenceForKey(showRisersFallers,("showRisersFallers"+widgetID));
+    if (window.widget) widget.setPreferenceForKey(showRisersFallers,("showRisersFallers" + widgetID));
     if (showRisersFallers) {
         requestRF();
     }

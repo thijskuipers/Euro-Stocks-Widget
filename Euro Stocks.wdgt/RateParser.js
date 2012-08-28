@@ -5,10 +5,6 @@
 
 var debugStocksURL ="http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 
-// global request variables
-var reqStocks;
-
-
 function makeStockRateURL() {
     var stringStockNames = Stocks.toString(",");
     var urlStockNames = encodeURIComponent(stringStockNames);
@@ -18,38 +14,41 @@ function makeStockRateURL() {
     //return debugStocksURL;
 }
 
-function requestStockRates()
-{
-    reqStocks = new XMLHttpRequest();
-    reqStocks.onreadystatechange = receiveStockRates;
+function requestStockRates() {
+    var reqStocks = new XMLHttpRequest();
+    reqStocks.onreadystatechange = function () {
+        if (reqStocks.readyState == 4)
+        {
+            if (reqStocks.status == 200)
+            {
+                parseStockRates(reqStocks.responseText);
+                if (debugEnabled) {
+                    // console.log(reqStocks.responseText);
+                }
+            }
+            else
+            {
+                if (debugEnabled) {
+                    console.log("Error in Stockrates request");
+                }
+            }
+        }
+    };
     reqStocks.open("GET", makeStockRateURL(), true);
     reqStocks.setRequestHeader("Cache-Control", "no-cache");
     reqStocks.send("");
-}
 
-function receiveStockRates()
-{
-    if (reqStocks.readyState == 4)
-    {
-        if (reqStocks.status == 200)
-        {
-            parseStockRates(reqStocks.responseText);
-            if (debugEnabled) {
-                // console.log(reqStocks.responseText);
-            }
-        }
-        else
-        {
-            if (debugEnabled) {
-                console.log("Error in Stockrates request");
-            }
-        }
+    if (debugEnabled) {
+        console.log("Retrieving stock rates asynchronously");
     }
 }
 
 function parseStockRates(responseStocks) {
     var dataRows = responseStocks.split(/\r\n|\n/gi); // split response text by line endings into array
-    console.log("rows: " + dataRows.length);
+    
+    if (debugEnabled) {
+        console.log("rows: " + dataRows.length);        
+    }
     
     for (var i = 0, len = dataRows.length; i < len; i++) {
         dataRows[i] = dataRows[i].split(","); // split each line by comma into array
@@ -57,8 +56,10 @@ function parseStockRates(responseStocks) {
         for (var j = 0, jLen = dataRows[i].length; j < jLen; j++) {
             dataRows[i][j] = dataRows[i][j].replace(/\"/gi,""); // remove quotes for each line in field
         }
-        
-        console.log("row[" + i + "].length: " + dataRows[i].length);
+
+        if (debugEnabled) {
+            console.log("row[" + i + "].length: " + dataRows[i].length);
+        }
     }
     
     // Remove empty entries from the array.
@@ -70,12 +71,20 @@ function parseStockRates(responseStocks) {
         }
     }
     
-    console.log("dataRows.length after pruning: " + dataRows.length);
+    if (debugEnabled) {
+        console.log("dataRows.length after pruning: " + dataRows.length);
+    }
 
+    // Set the global accessor for the stocks data to the data rows.
+    stocksDataRows = dataRows;
+    
     var least = Math.min(dataRows.length, numberOfStocks);
-    console.log("least: " + least);
+    if (debugEnabled) {
+        console.log("least: " + least);
+    }
     
     var changeClass = "stockchangepos";
+    var percentage = 0.0;
     
     for (var i = 0; i < least; i++) {
         // Name: 0
@@ -88,7 +97,9 @@ function parseStockRates(responseStocks) {
         // Low: 7
         // Volume: 8
         var row = dataRows[i];
-        console.log(row[0] + ": " + row[1]);
+        if (debugEnabled) {
+            console.log(row[0] + ": " + row[1]);
+        }
         document.getElementById("stockbarname" + (i + 1)).innerHTML = row[0];
         document.getElementById("stockbarvalue" + (i + 1)).innerHTML = row[1];
         if (showPercentage) {
