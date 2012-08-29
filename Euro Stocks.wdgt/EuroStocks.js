@@ -316,7 +316,6 @@ function switchChangePercentage() {
     var dataRows = stocksDataRows;
     
     if (!dataRows) {
-        console.log("no data, returning...");
         return;
     }
     

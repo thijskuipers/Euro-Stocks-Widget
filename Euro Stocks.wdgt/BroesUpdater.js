@@ -37,16 +37,12 @@ var BroesUpdater = function() {
     }
     
     function checkForUpdate() {
-        console.log("checkForUpdate");
-        
         var reqversion = new XMLHttpRequest();
         
         function compareVersion () { 
             if (reqversion.readyState === 4) {
                 if (reqversion.status === 200) {
                     lastTimeUpdateCheck = Math.floor(new Date().getTime() / 1000);
-                    
-                    console.log("responseText: " + reqversion.responseText);
                     
                     if (currentVersion !== reqversion.responseText) {
                         feedbackPanel.innerHTML = "New version available!<br>New version: " + reqversion.responseText;
@@ -70,8 +66,6 @@ var BroesUpdater = function() {
     }
 
     function isItTimeToUpdate(updateNow) {
-        console.log("isItTimeToUpdate, force: " + updateNow);
-        
         var _updateNow = updateNow || false; // default false
 
         var dateNow = new Date();
