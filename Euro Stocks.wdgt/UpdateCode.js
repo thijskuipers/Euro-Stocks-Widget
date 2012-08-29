@@ -3,12 +3,11 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var currentVersion = "1.6"; // the current version of the widget
+var currentVersion = "1.7"; // the current version of the widget
 var debugUpdateURL = "http://localhost:8888/New Euro Stocks/version.html";
 var updateURL = "http://widgets.broes.nl/euroStocksVersion.php";
-var reqVersion = false; // The version XML request
 var lastTimeUpdateCheck = 0; // Last time the widget checked for an update
-var update=false; // Do update yes or no
+var update = false; // Do update yes or no
 
 function updateCheckbox()
 {
@@ -26,40 +25,42 @@ function updateCheckbox()
 
 function checkForUpdate()
 {
-    reqVersion = new XMLHttpRequest();
-    reqVersion.onreadystatechange = compareVersion;
+    var reqVersion = new XMLHttpRequest();
+    
+    reqVersion.onreadystatechange = function ()
+    { 
+        if (reqVersion.readyState == 4)
+        {
+            if (reqVersion.status == 200)
+            {
+                var dateNow = new Date();
+                dateNow = Math.round(dateNow.getTime() / 1000);
+                lastTimeUpdateCheck = dateNow;
+                var serverVersion = reqVersion.responseText;
+                reqVersion = null;
+                if ((currentVersion != serverVersion) && (serverVersion != null) && (serverVersion != ""))
+                {
+                    document.getElementById("updateFeedback").innerHTML = "New version available!<br>Available version: " + serverVersion;
+                    updateAvailable();
+                }
+                else
+                {
+                    document.getElementById("updateFeedback").innerHTML = "This version (" + currentVersion + ") is up to date!";
+                }
+            }
+            else
+            {
+                document.getElementById("updateFeedback").innerHTML = "Can't connect to server.";
+            }
+        }
+    };
+    
     reqVersion.open("GET", updateURL, true);
     reqVersion.setRequestHeader("Cache-Control", "no-cache");
     reqVersion.send(null);
 }
 
-function compareVersion()
-{ 
-    if (reqVersion.readyState == 4)
-    {
-        if (reqVersion.status == 200)
-        {
-            var dateNow = new Date();
-            dateNow = Math.round(dateNow.getTime() / 1000);
-            lastTimeUpdateCheck = dateNow;
-            var serverVersion = reqVersion.responseText;
-            reqVersion = null;
-            if ((currentVersion != serverVersion) && (serverVersion != null) && (serverVersion != ""))
-            {
-                document.getElementById("updateFeedback").innerHTML = "New version available!<br>Available version: " + serverVersion;
-                updateAvailable();
-            }
-            else
-            {
-                document.getElementById("updateFeedback").innerHTML = "This version (" + currentVersion + ") is up to date!";
-            }
-        }
-        else
-        {
-            document.getElementById("updateFeedback").innerHTML = "Can't connect to server.";
-        }
-    }
-}
+
 
 function isItTimeToUpdate()
 {

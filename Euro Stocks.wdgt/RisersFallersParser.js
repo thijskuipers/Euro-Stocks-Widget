@@ -3,12 +3,11 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var reqRF; // the XMLHttpRequest
-
 function makeRisersFallersURL()
 {
     var stockName = encodeURIComponent(Stocks[selectedStock]);
-    var url = "http://uk.old.finance.yahoo.com/d/quotes.csv?s=@" + stockName + "&f=sl1d1t1c1ohgv&e=.csv";
+    // The z parameter allows us to download more than 50 index components (stocks) at a time
+    var url = "http://download.finance.yahoo.com/d/quotes.csv?s=@" + stockName + "&f=sl1d1t1c1ohgv&e=.csv&z=1";
     //var url = "http://localhost:8888/eurostocks/quotes.csv";
     
     return url;
@@ -25,27 +24,26 @@ function requestRF()
     document.getElementById('switchGraphSelect').style.opacity = "0.0";
     document.getElementById('switchGraphSelect').setAttribute("onclick","switchShowRF()");
     
-    reqRF = new XMLHttpRequest();
-    reqRF.onreadystatechange = receiveRF;
+    var reqRF = new XMLHttpRequest();
+    reqRF.onreadystatechange = function ()
+    {
+        if (reqRF.readyState == 4)
+        {
+            if (reqRF.status == 200)
+            {
+                parseRF(reqRF.responseText);
+            }
+            else
+            {
+                document.getElementById("graphMessage").innerHTML = "No R/F data available";
+                document.getElementById('rfTableDiv').style.visibility = "hidden";            
+            }
+        }
+    };
+    
     reqRF.open("GET", makeRisersFallersURL(), true);
     reqRF.setRequestHeader("Cache-Control", "no-cache");
     reqRF.send("");
-}
-
-function receiveRF(stockName)
-{
-    if (reqRF.readyState == 4)
-    {
-        if (reqRF.status == 200)
-        {
-            parseRF(reqRF.responseText);
-        }
-        else
-        {
-            document.getElementById("graphMessage").innerHTML = "No R/F data available";
-            document.getElementById('rfTableDiv').style.visibility = "hidden";            
-        }
-    }
 }
 
 function parseRF(responseText)
