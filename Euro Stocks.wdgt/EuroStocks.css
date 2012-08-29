@@ -152,21 +152,6 @@ body {
 }
 	
 /* @end */
-/* @group Debug */
-
-#debug1 {
-	z-index: 3;
-	position: absolute;
-	top: 150px;
-	left: 3px;
-	font: 12px Helvetica;
-	color: purple;
-	width: 210px;
-	overflow: auto;
-	display: none;
-}
-
-/* @end */
 
 /* @group Front */
 

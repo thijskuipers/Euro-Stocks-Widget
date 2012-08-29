@@ -3,7 +3,6 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var debug1; // the debug div
 var debugEnabled = false;
 
 // global UI variables
@@ -26,7 +25,6 @@ var arrayStocks;
 var stocksDataRows;
 
 function setup() {
-    debug1 = document.getElementById("debug1");
     
     BroesUpdater.init("updatepanel", "updateFeedback", "btnUpdateYes", "btnUpdateNo");
 
@@ -120,11 +118,11 @@ function updateFront() {
 // retrieve saved preferences, when they're non-existent, do nothing (see defaults above)
 function getPrefs() {
     if (window.widget) {
-        var StocksPrefs = widget.preferenceForKey(("Stocks" + widgetID));
-        var chartPeriodPrefs = widget.preferenceForKey(("chartPeriod" + widgetID));
-        var selectedStockPrefs = widget.preferenceForKey(("selectedStock" + widgetID));
-        var updateAllowedPrefs = widget.preferenceForKey(("updateAllowed" + widgetID));
-        var showPercentagePrefs = widget.preferenceForKey(("showPercentage" + widgetID));
+        var StocksPrefs = widget.preferenceForKey("Stocks" + widgetID);
+        var chartPeriodPrefs = widget.preferenceForKey("chartPeriod" + widgetID);
+        var selectedStockPrefs = widget.preferenceForKey("selectedStock" + widgetID);
+        var updateAllowedPrefs = widget.preferenceForKey("updateAllowed" + widgetID);
+        var showPercentagePrefs = widget.preferenceForKey("showPercentage" + widgetID);
         
         if (StocksPrefs !== undefined) {
             Stocks = StocksPrefs.split(",");
@@ -136,8 +134,8 @@ function getPrefs() {
             selectedStock = parseInt(selectedStockPrefs);
         }
         if (updateAllowedPrefs !== undefined) {
-            console.log("typeof updateAllowedPrefs: " + (typeof updateAllowedPrefs));
-            document.getElementById('updateCheckbox').checked = updateAllowedPrefs;
+            updateAllowed = !!updateAllowedPrefs;
+            document.getElementById('updateCheckbox').checked = updateAllowed;
         }
         if (showPercentagePrefs !== undefined) {
             showPercentage = showPercentagePrefs;
@@ -514,7 +512,7 @@ function switchShowRF() {
 
 function updateCheckbox()
 {
-    var updateAllowed = document.getElementById("updateCheckbox").checked;
+    updateAllowed = document.getElementById("updateCheckbox").checked;
     
     if (window.widget) {
         widget.setPreferenceForKey(updateAllowed, ("updateAllowed" + widgetID));

@@ -10,13 +10,13 @@ var BroesUpdater = function() {
         versionUrl = "http://widgets.broes.nl/euroStocksVersion.php",
         downloadUrl = "http://www.broes.nl/widgets/eurostocks/",
         updatePanel,
-        feedbackPanelId;
+        feedbackPanel;
     
     // private methods
     
     function init(updatePanelId, feedbackPanelId, yesBtnId, noBtnId) {
         updatePanel = document.getElementById(updatePanelId);
-        feedbackPanelId = document.getElementById(feedbackPanelId);
+        feedbackPanel = document.getElementById(feedbackPanelId);
         var updNoButton = new AppleGlassButton(document.getElementById(noBtnId), "No", dontUpdate); 
         var updYesButton = new AppleGlassButton(document.getElementById(yesBtnId), "Yes, update", doUpdate);
     }
@@ -37,23 +37,27 @@ var BroesUpdater = function() {
     }
     
     function checkForUpdate() {
+        console.log("checkForUpdate");
+        
         var reqversion = new XMLHttpRequest();
         
         function compareVersion () { 
             if (reqversion.readyState === 4) {
                 if (reqversion.status === 200) {
                     lastTimeUpdateCheck = Math.floor(new Date().getTime() / 1000);
-
+                    
+                    console.log("responseText: " + reqversion.responseText);
+                    
                     if (currentVersion !== reqversion.responseText) {
-                        document.getElementById("versioninfo").innerHTML = "New version available!<br>New version: " + reqversion.responseText;
+                        feedbackPanel.innerHTML = "New version available!<br>New version: " + reqversion.responseText;
                         updateAvailable();
                     }
                     else {
-                        document.getElementById("versioninfo").innerHTML = "This version (" + currentVersion + ") is up to date.";
+                        feedbackPanel.innerHTML = "This version (" + currentVersion + ") is up to date.";
                     }
                 }
                 else {
-                    document.getElementById("versioninfo").innerHTML = "Can't connect to server.";
+                    feedbackPanel.innerHTML = "Can't connect to server.";
                 }
                 reqversion = false;
             }
@@ -66,6 +70,8 @@ var BroesUpdater = function() {
     }
 
     function isItTimeToUpdate(updateNow) {
+        console.log("isItTimeToUpdate, force: " + updateNow);
+        
         var _updateNow = updateNow || false; // default false
 
         var dateNow = new Date();
