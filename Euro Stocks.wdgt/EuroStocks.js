@@ -15,7 +15,7 @@ var widgetID = "";
 var updateAllowed = true;
 
 // default preferences
-var Stocks = new Array("AAPL","^AEX","TOM2.AS","^FTSE"); // example: (AAPL,^AEX,AABA.AS)
+var Stocks = new Array("AAPL","GOOG","^FTSE","EURUSD=X"); // example: (AAPL,^AEX,AABA.AS)
 var selectedStock = 0; // the index of the selected stock in Stocks
 var chartPeriod = 1; // 1-7 -> 2w,1m,3m,6m,1y,2y,5y
 var numberOfStocks = 3;
@@ -168,24 +168,29 @@ function getData() {
     } 
 }
 
-function formatNumber(num, dec) { // num = number to format, dec = number of decimals
+function formatNumber(num, dec, addSign) { // num = number to format, dec = number of decimals
     if (isNaN(num)) {
         return "N/A";
     }
     else {
         num = parseFloat(num);
         dec = parseInt(dec);
-        var factor = Math.pow(10,dec);
+        var factor = Math.pow(10, dec);
+        var negative = num < 0;
         num = Math.abs(num);
         num = Math.round(num * factor);
         var numString = String(num);
-        var numberOfLeadingZeros = (num==0) ? dec : parseInt(dec - Math.floor(Math.log(num)/Math.log(10)));
-        for (q=0;q<numberOfLeadingZeros;q++) {
+        var numberOfLeadingZeros = (num == 0) ? dec : parseInt(dec - Math.floor(Math.log(num) / Math.log(10)));
+        for (q = 0; q < numberOfLeadingZeros; q++) {
             numString = "0" + numString;
         }
-        var left = numString.slice(0,(numString.length - dec));
+        var left = numString.slice(0, (numString.length - dec));
         var right = numString.slice(numString.length - dec);
-        return String(left) + ((dec>0) ? "." + String(right) : "");
+        var resultString = String(left) + ((dec > 0) ? "." + String(right) : "");
+        if (!!addSign) {
+            resultString = (negative ? "-&nbsp;" : "+&nbsp;") + resultString;
+        }
+        return resultString
     }
 }
 
@@ -340,10 +345,10 @@ function switchChangePercentage() {
         }
         if (showPercentage) {
             percentage = row[4] / (row[1] - row[4]) * 100;
-            changeEl.innerHTML = formatNumber(percentage, 2) + '%';
+            changeEl.innerHTML = formatNumber(percentage, 2, true) + '%';
         }
         else {
-            changeEl.innerHTML = formatNumber(row[4], 2);
+            changeEl.innerHTML = formatNumber(row[4], 2, true);
         }
         changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
         changeEl.setAttribute("class", changeClass);

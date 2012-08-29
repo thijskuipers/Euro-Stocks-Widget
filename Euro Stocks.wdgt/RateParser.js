@@ -104,10 +104,10 @@ function parseStockRates(responseStocks) {
         document.getElementById("stockbarvalue" + (i + 1)).innerHTML = row[1];
         if (showPercentage) {
             percentage = row[4] / (row[1] - row[4]) * 100;
-            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(percentage, 2) + '%';
+            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(percentage, 2, true) + '%';
         }
         else {
-            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(row[4], 2);
+            document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(row[4], 2, true);
         }
         changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
         document.getElementById("stockbarchange" + ( i + 1)).setAttribute("class", changeClass);
