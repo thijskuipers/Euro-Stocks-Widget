@@ -50,8 +50,8 @@ function setup() {
     // update select list on back
     for (var i = 0; i < Stocks.length; i++) {
         var newOption = new Option();
-        newOption.value=Stocks[i].toLowerCase();
-        newOption.text=Stocks[i].toUpperCase();
+        newOption.value = Stocks[i].toLowerCase();
+        newOption.text = Stocks[i].toUpperCase();
         document.getElementById('selectStock').add(newOption, null);
     }
 

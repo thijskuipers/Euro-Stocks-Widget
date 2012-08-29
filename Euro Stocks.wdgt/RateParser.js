@@ -111,6 +111,6 @@ function parseStockRates(responseStocks) {
         }
         changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
         document.getElementById("stockbarchange" + ( i + 1)).setAttribute("class", changeClass);
-        document.getElementById("stockbarclick" + (i + 1)).setAttribute("title", "Last update: " + row[2] + " " + row[3] + " GMT");
+        document.getElementById("stockbarclick" + (i + 1)).setAttribute("title", "Last update: " + row[2] + " " + row[3] + " EDT");
     }
 }
