@@ -13,6 +13,7 @@ var backHeight = 250;
 var showPercentage = false;
 var showRisersFallers = false;
 var widgetID = "";
+var updateAllowed = true;
 
 // default preferences
 var Stocks = new Array("AAPL","^AEX","TOM2.AS","^FTSE"); // example: (AAPL,^AEX,AABA.AS)
@@ -26,6 +27,8 @@ var stocksDataRows;
 
 function setup() {
     debug1 = document.getElementById("debug1");
+    
+    BroesUpdater.init("updatepanel", "updateFeedback", "btnUpdateYes", "btnUpdateNo");
 
     // Only perform these setup steps when it's a widget
     if (window.widget) {
@@ -73,7 +76,9 @@ function setup() {
 
 function onWidgetShow() {
     getData();
-    isItTimeToUpdate();
+    if (updateAllowed) {
+        BroesUpdater.isItTimeToUpdate();
+    }
 }
 
 function onWidgetRemoval() {
@@ -115,24 +120,26 @@ function updateFront() {
 // retrieve saved preferences, when they're non-existent, do nothing (see defaults above)
 function getPrefs() {
     if (window.widget) {
-        var StocksPrefs = widget.preferenceForKey(("Stocks"+widgetID));
-        var chartPeriodPrefs = widget.preferenceForKey(("chartPeriod"+widgetID));
-        var selectedStockPrefs = widget.preferenceForKey(("selectedStock"+widgetID));
-        var updateAllowedPrefs = widget.preferenceForKey(("updateAllowed"+widgetID));
-        var showPercentagePrefs = widget.preferenceForKey(("showPercentage"+widgetID));
-        if (StocksPrefs!=undefined) {
+        var StocksPrefs = widget.preferenceForKey(("Stocks" + widgetID));
+        var chartPeriodPrefs = widget.preferenceForKey(("chartPeriod" + widgetID));
+        var selectedStockPrefs = widget.preferenceForKey(("selectedStock" + widgetID));
+        var updateAllowedPrefs = widget.preferenceForKey(("updateAllowed" + widgetID));
+        var showPercentagePrefs = widget.preferenceForKey(("showPercentage" + widgetID));
+        
+        if (StocksPrefs !== undefined) {
             Stocks = StocksPrefs.split(",");
         }
-        if (chartPeriodPrefs!=undefined) {
+        if (chartPeriodPrefs !== undefined) {
             chartPeriod = parseInt(chartPeriodPrefs);
         }
-        if (selectedStockPrefs!=undefined) {
+        if (selectedStockPrefs !== undefined) {
             selectedStock = parseInt(selectedStockPrefs);
         }
-        if (updateAllowedPrefs!=undefined) {
+        if (updateAllowedPrefs !== undefined) {
+            console.log("typeof updateAllowedPrefs: " + (typeof updateAllowedPrefs));
             document.getElementById('updateCheckbox').checked = updateAllowedPrefs;
         }
-        if (showPercentagePrefs!=undefined) {
+        if (showPercentagePrefs !== undefined) {
             showPercentage = showPercentagePrefs;
         }
     }
@@ -162,8 +169,6 @@ function getData() {
         }
     } 
 }
-
-
 
 function formatNumber(num, dec) { // num = number to format, dec = number of decimals
     if (isNaN(num)) {
@@ -379,7 +384,6 @@ function addNewStock() {
     if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
 }
 
-
 function removeExistingStock() {
     // remove all selected stocks, starting with the last
     var selectStockEl = document.getElementById('selectStock');
@@ -505,5 +509,21 @@ function switchShowRF() {
     }
     else {
         requestChartRates(chartPeriod);        
+    }
+}
+
+function updateCheckbox()
+{
+    var updateAllowed = document.getElementById("updateCheckbox").checked;
+    
+    if (window.widget) {
+        widget.setPreferenceForKey(updateAllowed, ("updateAllowed" + widgetID));
+    }
+    
+    if (!updateAllowed) {
+        document.getElementById("updateFeedback").innerHTML = "This version: " + BroesUpdater.currentVersion;
+    }
+    else {
+        BroesUpdater.isItTimeToUpdate(true);
     }
 }

@@ -14,7 +14,7 @@
 	<script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
 	<script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
 	<script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
-	<script src="UpdateCode.js" type="text/javascript" charset="utf-8"></script>
+	<script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
 	<script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="RateParser.js" type="text/javascript" charset="utf-8"></script>
@@ -158,15 +158,12 @@
     </div>
     
     <div id="updatepanel">
-        <span id="updatetext">An update is available.<br>Go to download page?</span>
-        <div id="updateno" onMouseDown="mouseDownNo()" onMouseUp="doNotUpdate()" onMouseOut="mouseOutNo()">
-            <img id="updatenoimage" src="images/updatepanelno.png" width="54" height="25">
-            <span id="updatenotext">No</span>
+        <div id="updatetext">
+            <p>Er is een update beschikbaar.</p>
+            <p>Nu downloaden?</p>
         </div>
-        <div id="updateyes" onMouseDown="mouseDownYes()" onMouseUp="doUpdate()" onMouseOut="mouseOutYes()">
-            <img id="updateyesimage" src="images/updatepanelyes.png" width="54" height="25">
-            <span id="updateyestext">Yes</span>
-        </div>
+        <div id="btnUpdateNo"></div>
+        <div id="btnUpdateYes"></div>
     </div>
     
     <div id="debug1">
