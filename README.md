@@ -10,3 +10,7 @@ Here's a screenshot:
 
 And here's a link to the widget's own page on my blog:  
 [http://www.broes.nl/widgets/eurostocks/](http://www.broes.nl/widgets/eurostocks/)
+
+System Requirements
+-------------------
+Mac OS X 1.0.4.3 and higher (Tiger, Leopard, Snow Leopard, Lion, Mountain Lion)
