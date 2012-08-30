@@ -25,11 +25,11 @@
             <div id="topbarmiddle"></div>
             <div id="topbarbottom"></div>
             <div id="stockbars" data-bind="foreach: stocks">
-                <div class="stockbar">
-                    <div class="stockclick"></div>
+                <div class="stockbar" data-bind="css: { selected: $data === $root.selectedStock() }">
+                    <div class="stockclick" data-bind="click: $root.selectedStock"></div>
                     <div class="stockname" data-bind="text: name"></div>
                     <div class="stockvalue" data-bind="text: value"></div>
-                    <div class="stockchange" data-bind="text: change"></div>
+                    <div class="stockchange" data-bind="text: change, click: $root.toggleShowPercentage, css: { negative: isNegativeChange() }"></div>
                 </div>
             </div>           
         </div>
@@ -134,46 +134,7 @@
         <div id="btnUpdateNo"></div>
         <div id="btnUpdateYes"></div>
     </div>
-    
-    <script>
-    // Create local scope
-    (function () {
-        function Stock(code, name, value, change) {
-            var self = this,
-                change = parseFloat(change);
-            self.code = code;
-            self.name = name;
-            self.value = parseFloat(value);
-            self.showChangeAsPercentage = ko.observable(false);
-            self.change = ko.computed(function () {
-                if(self.showChangeAsPercentage()) {
-                    return (change / (self.value - change) * 100).toFixed(2) + "%";
-                }
-                else {
-                    return change.toFixed(2);
-                }
-            });
-        }
-        
-        function StocksViewModel() {
-            var self = this;
-            self.stocks = ko.observableArray([
-                new Stock("AAPL", "AAPL", 678.22, 12.31),
-                new Stock("GOOG", "GOOG", 75.25, 5),
-                new Stock("^FTSE", "^FTSE", 5678.99, 30.99)
-            ]);
-        }
-        
-        var stocksViewModel = new StocksViewModel();
-        
-        ko.applyBindings(stocksViewModel);
-        // debugger;
-        
-        setTimeout(function() {
-            stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 0.33));
-        }, 1000);
-    }());
-    </script>
-    
+
+    <script src="App.js"></script>
 </body>
 </html>
