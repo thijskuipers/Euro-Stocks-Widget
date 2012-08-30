@@ -1,6 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,63 +7,34 @@
 	<meta name="author" content="Broes http://www.broes.nl">
 
 	<link rel="stylesheet" href="EuroStocks.css">	
+    <script src="libs/knockout-2.1.0.js"></script>
 
-	<script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
-	<script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
-	<script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
-	<script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
-	<script src="RateParser.js" type="text/javascript" charset="utf-8"></script>
+    <!-- <script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
+    <script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
+    <script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
+    <script src="RateParser.js" type="text/javascript" charset="utf-8"></script> -->
 </head>
-<body onload="setup();">
+<body> <!-- onload="setup();"> -->
     <div id="front">
         <div id="topbar">
             <div id="topbartop"></div>
             <div id="topbarmiddle"></div>
             <div id="topbarbottom"></div>
-            <div id="stockbars">
-                <div id="stockbar1" class="stockbarselected">
-                    <div id="stockbarclick1" class="stockclick" onClick="selectStock(id)"></div>
-                    <div id="stockbarname1" class="stockname">
-                        aapl
-                    </div>
-                    <div id="stockbarvalue1" class="stockvalue">
-                        187.14
-                    </div>
-                    <div id="stockbarchange1" class="stockchangepos" onclick="switchChangePercentage()">
-                        2.05
-                    </div>
-                </div>
-                <div id="stockbar2" class="stockbar">
-                    <div id="stockbarclick2" class="stockclick" onClick="selectStock(id)"></div>
-                    <div id="stockbarname2" class="stockname">
-                        ^aex
-                    </div>
-                    <div id="stockbarvalue2" class="stockvalue">
-                        545.25
-                    </div>
-                    <div id="stockbarchange2" class="stockchangeneg" onclick="switchChangePercentage()">
-                        5.87
-                    </div>
-                </div>
-                <div id="stockbar3" class="stockbar">
-                    <div id="stockbarclick3" class="stockclick" onClick="selectStock(id)"></div>
-                    <div id="stockbarname3" class="stockname">
-                       aaba.as
-                    </div>
-                    <div id="stockbarvalue3" class="stockvalue">
-                       37.68
-                    </div>
-                    <div id="stockbarchange3" class="stockchangepos" onclick="switchChangePercentage()">
-                       0.01
-                    </div>
+            <div id="stockbars" data-bind="foreach: stocks">
+                <div class="stockbar">
+                    <div class="stockclick"></div>
+                    <div class="stockname" data-bind="text: name"></div>
+                    <div class="stockvalue" data-bind="text: value"></div>
+                    <div class="stockchange" data-bind="text: change"></div>
                 </div>
             </div>           
         </div>
         
-        <div id="graphslideout" onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()">
+        <div id="graphslideout"> <!-- onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()"> -->
             <div id="graphMessage">Message.</div>
             <div id="graphDiv">
                 <div id="selectPeriodBar">
@@ -165,6 +134,46 @@
         <div id="btnUpdateNo"></div>
         <div id="btnUpdateYes"></div>
     </div>
+    
+    <script>
+    // Create local scope
+    (function () {
+        function Stock(code, name, value, change) {
+            var self = this,
+                change = parseFloat(change);
+            self.code = code;
+            self.name = name;
+            self.value = parseFloat(value);
+            self.showChangeAsPercentage = ko.observable(false);
+            self.change = ko.computed(function () {
+                if(self.showChangeAsPercentage()) {
+                    return (change / (self.value - change) * 100).toFixed(2) + "%";
+                }
+                else {
+                    return change.toFixed(2);
+                }
+            });
+        }
+        
+        function StocksViewModel() {
+            var self = this;
+            self.stocks = ko.observableArray([
+                new Stock("AAPL", "AAPL", 678.22, 12.31),
+                new Stock("GOOG", "GOOG", 75.25, 5),
+                new Stock("^FTSE", "^FTSE", 5678.99, 30.99)
+            ]);
+        }
+        
+        var stocksViewModel = new StocksViewModel();
+        
+        ko.applyBindings(stocksViewModel);
+        // debugger;
+        
+        setTimeout(function() {
+            stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 0.33));
+        }, 1000);
+    }());
+    </script>
     
 </body>
 </html>

@@ -3,7 +3,7 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var debugEnabled = false;
+var debugEnabled = true;
 
 // global UI variables
 var topbarHeight = 103;
@@ -15,7 +15,9 @@ var widgetID = "";
 var updateAllowed = true;
 
 // default preferences
-var Stocks = ["AAPL", "GOOG", "^FTSE", "EURUSD=X"];
+var Stocks = [
+    "AAPL", "GOOG", "^FTSE", "EURUSD=X"
+];
 var selectedStock = 0; // the index of the selected stock in Stocks
 var chartPeriod = 1; // 1-7 -> 2w,1m,3m,6m,1y,2y,5y
 var numberOfStocks = 3;

@@ -1,4 +1,4 @@
-body {
+html, body {
 	margin: 0;
 	padding: 0;
 }
@@ -177,15 +177,12 @@ body {
 /* @group TopBar */
 
 #topbar {
-	margin: 0;
-	padding: 0;
-	display: block;
-	position: absolute;
+	position: relative;
 	top: 0;
 	left: 0;
 	width: 216px;
-	height: 103px;
 	z-index: 2;
+	padding-bottom: 7px;
 }
 
 #topbartop {
@@ -228,36 +225,24 @@ body {
 
 /* @group StockBar */
 
+#stockbars {
+    position: relative;
+    padding: 5px 9px;
+}
+
 .stockbar {
-	width: 198px;
 	height: 29px;
-	margin: 0;
-	padding: 0;
-	display: block;
-	position: absolute;
+	position: relative;
 	z-index: 5;
 	background: url(images/light_blue_bar.png) no-repeat;
-	left: 9px;
 	color: white;
 	text-shadow: #666666 0px -1px 1px;
 	font: 14px "Helvetica Neue";
 	text-transform: lowercase;
 }
 
-.stockbarselected {
-	width: 198px;
-	height: 29px;
-	margin: 0;
-	padding: 0;
-	display: block;
-	position: absolute;
-	z-index: 5;
+.stockbar.selected {
 	background: url(images/dark_blue_bar.png) no-repeat;
-	left: 9px;
-	color: white;
-	text-shadow: #666666 0px -1px 1px;
-	font: 14px "Helvetica Neue";
-	text-transform: lowercase;
 }
 
 .stockclick {
@@ -292,7 +277,8 @@ body {
 	z-index: 1;
 }
 
-.stockchangepos {
+.stockchange,
+.stockchange.positive {
 	margin: 0;
 	padding: 1px 3px 0 0;
 	display: block;
@@ -306,30 +292,8 @@ body {
 	z-index: 3;
 }
 
-.stockchangeneg {
-	margin: 0;
-	padding: 1px 3px 0 0;
-	display: block;
-	position: absolute;
-	top: 5px;
-	left: 129px;
+.stockchange.negative {
 	background-image: url(images/red_change.png);
-	width: 52px;
-	height: 17px;
-	text-align: right;
-	z-index: 3;
-}
-
-#stockbar1 {
-	top: 6px;
-}
-
-#stockbar2 {
-	top: 34px;
-}
-
-#stockbar3 {
-	top: 62px;
 }
 
 /* @end */
@@ -432,11 +396,10 @@ body {
 	width: 206px;
 	height: 151px;
 	background: url(images/graph_slideout.png) no-repeat;
-	margin: 0;
+	margin: -45px 5px 0 5px;
 	padding: 0;
 	display: block;
-	position: absolute;
-	left: 5px;
+	position: relative;
 	z-index: 1;
 	bottom: 0;
 }
