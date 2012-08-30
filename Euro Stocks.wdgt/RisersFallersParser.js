@@ -48,106 +48,71 @@ function requestRF()
 
 function parseRF(responseText)
 {
-    //setTimeOut(0,function blabla(){document.getElementById("graphMessage").innerHTML = "R/F data received"});
     var numColumns = 9;
     responseText = responseText.replace(/\r\n|\n/gi,",");
     var arrayRF = responseText.split(",");
-    for (x in arrayRF) {
+    for (var x in arrayRF) {
         arrayRF[x] = arrayRF[x].replace(/\"/gi,"");
     }
-    var k=0;
-    var l=0;
+    var k = 0;
+    var l = 0;
     var arrayRFTrueLength = Math.floor(arrayRF.length/numColumns);
-    
-    var arrayRisers = new Array();
-    var arrayFallers = new Array();
+    var arrayRisers = [];
+    var arrayFallers = [];
     var RFName;
     var RFRate;
     var RFChange;
     var RFPercentage;
-    var j;
+    var j = 0;
 
-    for (i=0; i<arrayRFTrueLength; i++) {
+    for (var i = 0; i < arrayRFTrueLength; i++) {
         j = numColumns * i;
         
         RFName = arrayRF[j];
-        RFRate = parseFloat(arrayRF[(j+1)]);
-        RFChange = parseFloat(arrayRF[(j+4)]);
-        //var RFVolume = parseInt(arrayRF[(j+8)]);
+        RFRate = parseFloat(arrayRF[(j + 1)]);
+        RFChange = parseFloat(arrayRF[(j + 4)]);
         RFPercentage = RFChange / (RFRate - RFChange) * 100;
-        //var RFDate = arrayRF[(j+2)];
-        //var RFTime = arrayRF[(j+3)];
         
         if (!isNaN(RFPercentage)) {
             if (RFChange < 0) {
-                arrayFallers[k] = new Array(RFName,RFPercentage);
+                arrayFallers[k] = [RFName, RFPercentage];
                 k++;
             }
             else {
-                arrayRisers[l] = new Array(RFName,RFPercentage);
+                arrayRisers[l] = [RFName, RFPercentage];
                 l++;
             }
         }
     }
     
-    sortMultiArrayNew(arrayRisers,1,false);
-    var arrayRisersSorted = sortMultiArrayNew(arrayRisers,false);
-    var arrayFallersSorted = sortMultiArrayNew(arrayFallers,true);
-    appendRF(arrayRisersSorted,arrayFallersSorted);
+    var arrayRisersSorted = sortMultiArrayNew(arrayRisers, false);
+    var arrayFallersSorted = sortMultiArrayNew(arrayFallers, true);
+    appendRF(arrayRisersSorted, arrayFallersSorted);
     document.getElementById('rfTableDiv').style.visibility = "visible";
 }
 
 // much quicker sorting function than sortMultiArray
-function sortMultiArrayNew(multiArray,ascending){
-    var sortedArray = new Array();
-    for (i=0;i<7;i++) {
-        sortedArray[i] = new Array('broes',0.00);
+function sortMultiArrayNew(multiArray, ascending){
+    var sortedArray = [];
+    for (var i = 0; i < 7; i++) {
+        sortedArray[i] = ['broes', 0.00];
     }
-    for (x in multiArray) {
-        for (y in sortedArray) {
+    for (var x in multiArray) {
+        for (var y in sortedArray) {
             if (ascending && sortedArray[y][1] > multiArray[x][1] || !ascending && sortedArray[y][1] < multiArray[x][1]) {
                 sortedArray.pop();
-                sortedArray.splice(y,0,multiArray[x]);
+                sortedArray.splice(y, 0, multiArray[x]);
                 break;
             }
         }
     }
-    for (i=sortedArray.length-1;i>=0;i--) {
+    for (var i = sortedArray.length - 1; i >= 0; i--) {
         if (sortedArray[i][0] == 'broes') {
-            sortedArray.splice(i,1);
+            sortedArray.splice(i, 1);
         }
     }
     return sortedArray;
 }
-
-/*function sortByNumberAsc(a,b) {
-    return a-b;
-}
-
-function sortByNumberDesc(a,b) {
-    return b-a;
-}
-
-function sortMultiArray(multiArray,key,ascending) {
-    var sortingArray = new Array();
-    var i = 0;
-    for (x in multiArray) {
-        sortingArray[i] = multiArray[x][key];
-        i++;
-    }
-    sortingArray.sort((ascending) ? sortByNumberAsc : sortByNumberDesc);
-    var newMultiArray = new Array();
-    for (x in sortingArray) {
-        for (y in multiArray) {
-            if (sortingArray[x]==multiArray[y][key]) {
-                newMultiArray[x]=multiArray[y];
-                multiArray.splice(y,1);
-                break;
-            }
-        }
-    }
-    return newMultiArray;
-}*/
 
 function appendRF(arrayRisers,arrayFallers)
 {
@@ -157,11 +122,11 @@ function appendRF(arrayRisers,arrayFallers)
         output.removeChild(output.lastChild);
     }
     
-    var maxArrayRFLength = Math.max(arrayRisers.length,arrayFallers.length);
-    var maxDisplay = Math.min(7,maxArrayRFLength);
-    for (i=0; i<maxDisplay; i++) {
+    var maxArrayRFLength = Math.max(arrayRisers.length, arrayFallers.length);
+    var maxDisplay = Math.min(7, maxArrayRFLength);
+    for (var i = 0; i < maxDisplay; i++) {
         var tableRow = document.createElement('tr');
-        if (i%2) {
+        if (i % 2) {
             tableRow.setAttribute("class","evenRow");
         }
         else {
@@ -172,18 +137,26 @@ function appendRF(arrayRisers,arrayFallers)
         var fallerNameCell = document.createElement('td');
         var fallerPercCell = document.createElement('td');
         
-        if (i<arrayRisers.length) { // as long as Risers exist
+        if (i < arrayRisers.length) { // as long as Risers exist
             riserNameCell.innerHTML = (arrayRisers[i][0] != undefined) ? arrayRisers[i][0] : "";
-            riserPercCell.innerHTML = (arrayRisers[i][1] != undefined) ? formatNumber(arrayRisers[i][1],2) + "%" : "";
-            if (arrayRisers[i][2]==0.0) riserPercCell.setAttribute("class","noChange");
-            else riserPercCell.setAttribute("class","posChange");
+            riserPercCell.innerHTML = (arrayRisers[i][1] != undefined) ? formatNumber(arrayRisers[i][1], 2) + "%" : "";
+            if (arrayRisers[i][2] == 0.0) {
+                riserPercCell.setAttribute("class", "noChange");
+            }
+            else {
+                riserPercCell.setAttribute("class", "posChange");
+            }
         }
         
-        if (i<arrayFallers.length) { // as long as Fallers exist
+        if (i < arrayFallers.length) { // as long as Fallers exist
             fallerNameCell.innerHTML = (arrayFallers[i][0] != undefined) ? arrayFallers[i][0] : "";
             fallerPercCell.innerHTML = (arrayFallers[i][1] != undefined) ? formatNumber(arrayFallers[i][1],2) + "%" : "";
-            if (arrayFallers[i][2]==0.0) fallerPercCell.setAttribute("class","noChange");
-            else fallerPercCell.setAttribute("class","negChange");
+            if (arrayFallers[i][2] == 0.0) {
+                fallerPercCell.setAttribute("class","noChange");
+            }
+            else {
+                fallerPercCell.setAttribute("class", "negChange");
+            }
         }
 
         tableRow.appendChild(riserNameCell);
@@ -193,5 +166,6 @@ function appendRF(arrayRisers,arrayFallers)
         
         output.appendChild(tableRow);
     }
+    
     document.getElementById("graphMessage").style.display = "none";
 }

@@ -9,7 +9,6 @@ var horGridSkip = 4; // the number of gridlines to skip
 var numberOfColumns = 7; // number of columns in data array
 
 // global XML request variables
-var reqChart; // the XMLHttpRequest
 
 function requestChartRates(chartPeriodInt)
 {
@@ -26,10 +25,23 @@ function requestChartRates(chartPeriodInt)
     document.getElementById('switchRFSelect').style.opacity = "0.0";
     document.getElementById('switchRFSelect').setAttribute("onclick","switchShowRF()");
 
-    if (chartPeriodInt==1) drawIntradayChart();
+    if (chartPeriodInt == 1) drawIntradayChart();
     else {
-        reqChart = new XMLHttpRequest();
-        reqChart.onreadystatechange = receiveChartRates;
+        var reqChart = new XMLHttpRequest();
+        reqChart.onreadystatechange = function () {
+            if (reqChart.readyState == 4)
+            {
+                if (reqChart.status == 200)
+                {
+                    parseChartRates(reqChart.responseText);
+                }
+                else
+                {
+                    document.getElementById("graphMessage").innerHTML = "Chart not available";
+                }
+            }
+        };
+        
         reqChart.open("GET", makeChartURL(chartPeriodInt), true);
         reqChart.setRequestHeader("Cache-Control", "no-cache");
         reqChart.send("");
@@ -81,29 +93,13 @@ function makeIntradayChartURL() {
     return intradayChartURL;
 }
 
-function receiveChartRates()
-{
-    if (reqChart.readyState == 4)
-    {
-        if (reqChart.status == 200)
-        {
-            parseChartRates(reqChart.responseText);
-        }
-        else
-        {
-            document.getElementById("graphMessage").innerHTML = "Chart not available";
-            //document.getElementById('graphDiv').style.visibility = "hidden";
-        }
-    }
-}
-
 function parseChartRates(responseText)
 {
     responseText = responseText.replace(/(\r\n)|(\n)/gi,","); // convert line breaks (windows & unix) to commas
     var arrayRates = responseText.split(","); // split to array by commas
-    var arrayRatesRows = Math.floor(arrayRates.length/numberOfColumns); // floor -> only entire rows (last elements are line endings)
-    if (arrayRatesRows>5) { // only if response contains enough datapoints
-        drawChart(arrayRates,arrayRatesRows,0,6); // 0 -> dateColumn, 6 -> closevalueColumn
+    var arrayRatesRows = Math.floor(arrayRates.length / numberOfColumns); // floor -> only entire rows (last elements are line endings)
+    if (arrayRatesRows > 5) { // only if response contains enough datapoints
+        drawChart(arrayRates, arrayRatesRows, 0, 6); // 0 -> dateColumn, 6 -> closevalueColumn
     }
     else document.getElementById("graphMessage").innerHTML = "No data received.";
 }
@@ -125,10 +121,10 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     var yMax = arrayDateClose[closeColumn + numberOfColumns];
     
     // Find minimum and maximum y(rate) value
-    for (i=2;i<numberOfRows;i++) { // from third row (0=first row)
+    for (var i = 2; i < numberOfRows; i++) { // from third row (0=first row)
         var j = (i * numberOfColumns) + closeColumn; // select columns
-        yMin = Math.min(arrayDateClose[j],yMin); // compare current columns with previous column
-        yMax = Math.max(arrayDateClose[j],yMax);
+        yMin = Math.min(arrayDateClose[j], yMin); // compare current columns with previous column
+        yMax = Math.max(arrayDateClose[j], yMax);
     }
     var yRatio = canvasHeight / (yMax - yMin);
 
@@ -139,8 +135,8 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     // the horizontal grid
     context.save();
     var yGridStep = canvasHeight / 4; // 4 - 1 = number of gridlines
-    for (i = 1; i <= 3; i++) { // 3 = number of gridlines
-        context.moveTo(leftMargin,i * yGridStep + topMargin);
+    for (var i = 1; i <= 3; i++) { // 3 = number of gridlines
+        context.moveTo(leftMargin, i * yGridStep + topMargin);
         context.lineTo(canvasWidth + leftMargin, i * yGridStep + topMargin);
     }
     context.lineWidth = 1;
@@ -151,19 +147,19 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     // the vertical grid
     context.save();
     var countXGrid = 0;
-    var horizontalLabels = new Array();
+    var horizontalLabels = [];
     var prevDate = arrayDateClose[(numberOfColumns + dateColumn)].split("-"); // from row 2, split: y-m-d -> y,m,d
-    var nextDate = new Array();
-    for (i = 2; i < numberOfRows; i++) { // from row three (0 = first row)
+    var nextDate = [];
+    for (var i = 2; i < numberOfRows; i++) { // from row three (0 = first row)
         var j = (i * 7) + dateColumn;
         nextDate = arrayDateClose[j].split("-"); // split: y-m-d -> y,m,d
         // if the y,m or d changes, it's time for a new gridline, but some are skipped
         if (prevDate[horGridPeriod]!=nextDate[horGridPeriod]) { // compare according to: horGridPeriod = 0,1,2 -> y,m,d
             countXGrid++;
-            if (!(countXGrid%horGridSkip)) { // show every "horGridSKip" gridline, starting with the first
-                var xCoord = Math.round(canvasWidth - (i-1) * xStepSize + leftMargin);
-                context.moveTo(xCoord,topMargin); // 5 = margin
-                context.lineTo(xCoord,canvasHeight+topMargin); // 5 = margin
+            if (!(countXGrid % horGridSkip)) { // show every "horGridSKip" gridline, starting with the first
+                var xCoord = Math.round(canvasWidth - (i - 1) * xStepSize + leftMargin);
+                context.moveTo(xCoord, topMargin); // 5 = margin
+                context.lineTo(xCoord, canvasHeight+topMargin); // 5 = margin
                 horizontalLabels.push(xCoord); // add the xCoord of the label
                 horizontalLabels.push(prevDate[horGridPeriod]); // add the label
             }
@@ -176,9 +172,9 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.restore();
     
     // array to change the monthnumber to the monthname
-    var monthLabels = new Array("","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+    var monthLabels = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     function yearLabel(year) {
-        return "'"+year.slice(year.length-2);
+        return "'" + year.slice(year.length - 2);
     }
     
     var xGrid = document.getElementById("horGrid");
@@ -188,7 +184,7 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
         xGrid.removeChild(xGrid.lastChild);
     }
     // add the horizontal grid labels
-    for (i=0; i<(horizontalLabels.length/2);i++) {
+    for (var i = 0; i < (horizontalLabels.length / 2); i++) {
         var addXGrid = document.createElement("div");
          // if the horGridPeriod is in months, change the monthnumber to the monthname
         addXGrid.innerHTML = (horGridPeriod != 1) ? (horGridPeriod != 0) ? horizontalLabels[i * 2 + 1] : yearLabel(horizontalLabels[i * 2 + 1]) : monthLabels[parseFloat(horizontalLabels[(i * 2 + 1)])];
@@ -206,7 +202,7 @@ function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
     context.shadowBlur = 2;
     context.shadowOffsetY = 1;
     context.beginPath();
-    for (i = 1; i < numberOfRows; i++) { // from row 2 (0 = first row)
+    for (var i = 1; i < numberOfRows; i++) { // from row 2 (0 = first row)
         var j = (i * 7) + closeColumn;
         var xCoord = canvasWidth - (i - 1) * xStepSize + leftMargin;
         var yCoord = canvasHeight - (arrayDateClose[j] - yMin) * yRatio + topMargin;

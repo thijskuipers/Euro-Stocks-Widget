@@ -15,13 +15,12 @@ var widgetID = "";
 var updateAllowed = true;
 
 // default preferences
-var Stocks = new Array("AAPL","GOOG","^FTSE","EURUSD=X"); // example: (AAPL,^AEX,AABA.AS)
+var Stocks = ["AAPL", "GOOG", "^FTSE", "EURUSD=X"];
 var selectedStock = 0; // the index of the selected stock in Stocks
 var chartPeriod = 1; // 1-7 -> 2w,1m,3m,6m,1y,2y,5y
 var numberOfStocks = 3;
 
 // global data containers
-var arrayStocks;
 var stocksDataRows;
 
 function setup() {
@@ -61,7 +60,7 @@ function setup() {
         document.getElementById(("selectPeriodLabel" + chartPeriod)).removeAttribute("onClick");
         
         // reset all css classes for the chart periods
-        for (i = 1; i <= 7; i++)    {
+        for (var i = 1; i <= 7; i++)    {
             if (chartPeriod != i) {
                 document.getElementById("selectPeriodLabel" + i).setAttribute("class", "selectPeriodLabel");
                 document.getElementById("selectPeriodLabel" + i).setAttribute("onClick", "selectPeriod(id)");
@@ -107,7 +106,7 @@ function updateFront() {
     var idnumber = selectedStock + 1;
     document.getElementById(("stockbar" + idnumber)).setAttribute("class", "stockbarselected");
     document.getElementById(("stockbar" + idnumber)).removeAttribute("onClick");
-    for (i = 1; i <= numberOfStocks; i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
+    for (var i = 1; i <= numberOfStocks; i++) { // bij tweede argument het aantal stocks dynamisch neerzetten
         if (idnumber != i) {
             document.getElementById("stockbar" + i).setAttribute("class","stockbar");
             document.getElementById("stockbarclick" + i).setAttribute("onClick","selectStock(id)");
@@ -181,7 +180,7 @@ function formatNumber(num, dec, addSign) { // num = number to format, dec = numb
         num = Math.round(num * factor);
         var numString = String(num);
         var numberOfLeadingZeros = (num == 0) ? dec : parseInt(dec - Math.floor(Math.log(num) / Math.log(10)));
-        for (q = 0; q < numberOfLeadingZeros; q++) {
+        for (var q = 0; q < numberOfLeadingZeros; q++) {
             numString = "0" + numString;
         }
         var left = numString.slice(0, (numString.length - dec));
@@ -207,7 +206,7 @@ function mouseOutGraph() {
 function selectPeriod(id) {
     document.getElementById(id).setAttribute("class","selectedPeriodLabel");
     document.getElementById(id).removeAttribute("onClick");
-    for (i = 1; i <= 7; i++)    {
+    for (var i = 1; i <= 7; i++)    {
         if (id != "selectPeriodLabel" + i) {
             document.getElementById("selectPeriodLabel" + i).setAttribute("class", "selectPeriodLabel");
             document.getElementById("selectPeriodLabel" + i).setAttribute("onClick", "selectPeriod(id)");
@@ -215,20 +214,24 @@ function selectPeriod(id) {
     }
     chartPeriod = parseInt(id.replace("selectPeriodLabel", ""));
     requestChartRates(chartPeriod);
-    if (window.widget) widget.setPreferenceForKey(chartPeriod,("chartPeriod" + widgetID));
+    if (window.widget) {
+        widget.setPreferenceForKey(chartPeriod,("chartPeriod" + widgetID));
+    }
 }
 
 function selectStock(id) {
     var idnumber = id.replace("stockbarclick", "");
     document.getElementById(("stockbar" + idnumber)).setAttribute("class", "stockbarselected");
-    for (i = 1; i <= numberOfStocks; i++) {
+    for (var i = 1; i <= numberOfStocks; i++) {
         if (idnumber != i) {
             document.getElementById("stockbar" + i).setAttribute("class", "stockbar");
             document.getElementById("stockbarclick" + i).setAttribute("onClick", "selectStock(id)");
         }
     }
     selectedStock = idnumber - 1;
-    if (window.widget) widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
+    if (window.widget) {
+        widget.setPreferenceForKey(selectedStock, ("selectedStock" + widgetID));
+    }
     getData();
 }
 
@@ -352,23 +355,6 @@ function switchChangePercentage() {
         changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
         changeEl.setAttribute("class", changeClass);
     }
-
-    // if (arrayStocks) {
-    //     var arrayStocksRows = Math.floor(arrayStocks.length/9);
-    //     var least = Math.min(arrayStocksRows,numberOfStocks);
-    //     var percentage;
-    //     var row;
-    //     for (i=0;i<least;i++) {
-    //         row = i*9;
-    //         if (!showPercentage) {
-    //             percentage = (arrayStocks[row+4]==0.0) ? 0 : arrayStocks[row+4] / (arrayStocks[row+1] - arrayStocks[row+4]) * 100;
-    //             document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(percentage,2) + '%';
-    //         }
-    //         else {
-    //             document.getElementById("stockbarchange"+(i+1)).innerHTML = formatNumber(arrayStocks[row+4],2);
-    //         }
-    //     }
-    // }
 }
 
 function addNewStock() {
@@ -379,18 +365,18 @@ function addNewStock() {
     newOption.text=newStock;
     document.getElementById('selectStock').add(newOption,null);
     document.getElementById('stockNameField').value="";
-    Stocks = new Array();
-    for (i=0;i<document.getElementById('selectStock').length;i++) {
+    Stocks = [];
+    for (var i = 0; i < document.getElementById('selectStock').length; i++) {
         Stocks[i] = document.getElementById('selectStock').options[i].value.toUpperCase();
     }
-    if (window.widget) widget.setPreferenceForKey(Stocks.toString(","),("Stocks"+widgetID));
+    if (window.widget) widget.setPreferenceForKey(Stocks.toString(","), ("Stocks" + widgetID));
 }
 
 function removeExistingStock() {
     // remove all selected stocks, starting with the last
     var selectStockEl = document.getElementById('selectStock');
 
-    for (i = selectStockEl.length - 1; i >= 0; i--) { 
+    for (var i = selectStockEl.length - 1; i >= 0; i--) { 
         if (selectStockEl.options[i].selected && selectStockEl.length > 1) {
             selectStockEl.remove(i);
         }
@@ -400,9 +386,9 @@ function removeExistingStock() {
         selectedStock = 0;
     }
 
-    Stocks = new Array();
+    Stocks = [];
 
-    for (i = 0; i < selectStockEl.length; i++) {
+    for (var i = 0; i < selectStockEl.length; i++) {
         Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
@@ -431,9 +417,9 @@ function moveStockDown() {
         selectStockEl.remove(selectStockEl.selectedIndex);
     }
 
-    Stocks = new Array();
+    Stocks = [];
 
-    for (i = 0; i < selectStockEl.length; i++) {
+    for (var i = 0; i < selectStockEl.length; i++) {
         Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
@@ -457,9 +443,9 @@ function moveStockUp() {
         selectStockEl.add(newMe, beforeMe);
         selectStockEl.remove(selectedIndex);
     }
-    Stocks = new Array();
+    Stocks = [];
 
-    for (i = 0, len = selectStockEl.length ; i < len; i++) {
+    for (var i = 0, len = selectStockEl.length ; i < len; i++) {
         Stocks[i] = selectStockEl.options[i].value.toUpperCase();
     }
 
