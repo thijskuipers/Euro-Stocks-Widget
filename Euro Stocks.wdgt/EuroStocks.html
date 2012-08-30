@@ -25,7 +25,7 @@
             <div id="topbarmiddle"></div>
             <div id="topbarbottom"></div>
             <div id="stockbars" data-bind="foreach: stocks">
-                <div class="stockbar" data-bind="css: { selected: $data === $root.selectedStock() }">
+                <div class="stockbar" data-bind="css: { selected: $data === $root.selectedStock() }, attr: { title: lastUpdate() }">
                     <div class="stockclick" data-bind="click: $root.selectedStock"></div>
                     <div class="stockname" data-bind="text: name"></div>
                     <div class="stockvalue" data-bind="text: value"></div>
