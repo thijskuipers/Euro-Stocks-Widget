@@ -5,15 +5,15 @@
 	<key>AllowNetworkAccess</key>
 	<true/>
 	<key>CFBundleDisplayName</key>
-	<string>Euro Stocks</string>
+	<string>Euro Stocks Alpha</string>
 	<key>CFBundleIdentifier</key>
-	<string>eu.broes.widget.eurostocks</string>
+	<string>eu.broes.widget.eurostocks-alpha</string>
 	<key>CFBundleName</key>
 	<string>Euro Stocks</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.7</string>
+	<string>2.0alpha</string>
 	<key>CFBundleVersion</key>
-	<string>1.7</string>
+	<string>2.0alpha</string>
 	<key>CloseBoxInsetX</key>
 	<integer>9</integer>
 	<key>CloseBoxInsetY</key>
