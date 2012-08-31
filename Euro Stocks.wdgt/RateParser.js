@@ -5,10 +5,7 @@
 
 var RateParser = (function () {
     var self = this;
-    
-    // Going to use this to maintain state
-    self.stockRates = ko.observableArray([]);
-    
+        
     var debugStocksURL = "http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 
     function makeStockRateURL(arrayStockNames) {
@@ -20,8 +17,8 @@ var RateParser = (function () {
         //return debugStocksURL;
     }
 
-    
-    self.requestStockRates = function (arrayStockNames) {
+    // TODO: pass on the callback function
+    self.requestStockRates = function (arrayStockNames, callback) {
         if (typeof arrayStockNames !== "object" || typeof arrayStockNames.length !== "function") {
             throw new Error("RateParser.requestStockRates");
         }
