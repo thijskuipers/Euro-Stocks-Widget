@@ -13,13 +13,13 @@
     
     <!-- Application files -->
     <script src="RateParser.js"></script>
+    <script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
 
     <!-- <script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
     <script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
-    <script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
     <script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
      -->
 </head>
@@ -42,14 +42,8 @@
         <div id="graphslideout"> <!-- onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()"> -->
             <div id="graphMessage">Message.</div>
             <div id="graphDiv">
-                <div id="selectPeriodBar">
-                    <div class="selectedPeriodLabel" id="selectPeriodLabel1">1d</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel2" onClick="selectPeriod(id)">1m</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel3" onClick="selectPeriod(id)">3m</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel4" onClick="selectPeriod(id)">6m</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel5" onClick="selectPeriod(id)">1y</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel6" onClick="selectPeriod(id)">2y</div>
-                    <div class="selectPeriodLabel" id="selectPeriodLabel7" onClick="selectPeriod(id)">5y</div>
+                <div id="selectPeriodBar" data-bind="foreach: periods">
+                    <div class="selectPeriodLabel" data-bind="text: label, css: { selected: $data === $root.selectedPeriod() }, click: $root.selectedPeriod"></div>
                 </div>
                 
                 <div id="vertGrid">

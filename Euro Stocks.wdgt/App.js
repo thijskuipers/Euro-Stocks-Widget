@@ -5,6 +5,7 @@
     
     // application-wide fields (state)
     var showPercentage = ko.observable(false);
+    var refreshing = false;
     
     function Stock(code, name, value, previousClose, updateDate) {
         var self = this;
@@ -63,20 +64,77 @@
         self.toJSON = function () {
             return {
                 stocks: self.stocks(),
-                selectedStock: self.selectedStock().name
+                selectedStock: self.selectedStock().code
             };
         };
     }
     
-    var stocksViewModel = new StocksViewModel();
-    console.log(JSON.stringify(stocksViewModel));
+    function ChartViewModel() {
+        var self = this;
+        
+        self.periods = [
+            { id: 1, label: "1d" },
+            { id: 2, label: "1m" },
+            { id: 3, label: "3m" },
+            { id: 4, label: "6m" },
+            { id: 5, label: "1y" },
+            { id: 6, label: "2y" },
+            { id: 7, label: "5y" }
+        ];
+        
+        self.selectedPeriod = ko.observable(self.periods[1]);
+    }
     
+    var stocksViewModel = new StocksViewModel();
+    // console.log(JSON.stringify(stocksViewModel));
+    
+    var chartViewModel = new ChartViewModel();
+    
+    function updateStocks() {
+        var stocks = stocksViewModel.stocks(),
+            stockCodes = [];
+
+        for (var i = 0, len = stocks.length; i < len; i++) {
+            stockCodes.push(stocks[i].code);
+        }
+
+        var rateParser = new RateParser();
+        rateParser.requestStockRates(stockCodes, function (values) {
+            for (var i = 0, len = values.length; i < len; i++) {
+                var rate = values[i];
+                for (var j = 0, jLen = stocks.length; j < jLen; j++) {
+                    var currentStock = stocks[j];
+                    if(currentStock.code.toLowerCase() === rate.name.toLowerCase()) {
+                        currentStock.value(rate.value);
+                        currentStock.previousClose(rate.previousClose);
+                        currentStock.updateDate(rate.datetime);
+                        stocks.splice(j, 1); // remove the match from the array to speed up subsequent searches
+                        break; // break the inner loop, cause a match was already found
+                    }
+                }
+                console.log("Name, Value: " + rate.name + "; " + rate.value + "; " + rate.datetime);
+            }
+        });
+    }
+    
+    function updateChart(stock) {
+        var chartParser = new ChartParser();
+        chartParser.requestChartRates(chartViewModel.selectedPeriod().id, stock.code);        
+    }
+    
+    stocksViewModel.selectedStock.subscribe(function (stock) {
+        updateStocks();
+        updateChart(stock);
+    });
+
     ko.applyBindings(stocksViewModel, document.getElementById('stockbars'));
-    // debugger;
+    ko.applyBindings(chartViewModel, document.getElementById('graphslideout'));
     
     setTimeout(function() {
         stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 3.77, new Date()));
     }, 1000);
+    
+    setTimeout(updateStocks, 3000);
     
     // setTimeout(function() {
     //     stocksViewModel.stocks()[0].

@@ -418,43 +418,33 @@ html, body {
 /* @group SelectPeriodBar */
 
 #selectPeriodBar {
-	width: 177px;
-	height: 39px;
-	margin: 0;
-	padding: 0;
-	display: none;
-	z-index: 3;
-	background: url(images/select_period_bar.png) no-repeat;
-	position: absolute;
-	left: 14px;
-	bottom: 80px;
-}
-
-.selectedPeriodLabel {
-	display: block;
-	position: absolute;
-	top: 13px;
-	width: 18px;
-	height: 15px;
-	margin: 0;
-	padding: 2px 0 0 3px;
-	font: 11px Helvetica;
-	background: url(images/selected_period.png) no-repeat;
-	color: #eee;
-	-apple-dashboard-region: dashboard-region(control rectangle);
+    width: 177px;
+    height: 39px;
+    display: none;
+    z-index: 3;
+    background: url(images/select_period_bar.png) no-repeat;
+    position: absolute;
+    left: 14px;
+    bottom: 70px;
+    padding-top: 13px;
+    padding-left: 7px;
 }
 
 .selectPeriodLabel {
-	display: block;
-	position: absolute;
-	top: 13px;
-	width: 18px;
-	height: 15px;
-	margin: 0;
-	padding: 2px 0 0 3px;
-	font: 11px Helvetica;
-	color: #eee;
-	-apple-dashboard-region: dashboard-region(control rectangle);
+    display: block;
+    width: 18px;
+    height: 15px;
+    padding: 2px 0 0 3px;
+    font: 11px Helvetica;
+    color: #EEE;
+    float: left;
+    margin-right: 3px;
+    -apple-dashboard-region: dashboard-region(control rectangle);
+    -webkit-dashboard-region: dashboard-region(control rectangle);
+}
+
+.selectPeriodLabel.selected {
+	background: url(images/selected_period.png) no-repeat;
 }
 
 #selectPeriodLabel1 {

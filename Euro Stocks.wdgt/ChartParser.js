@@ -3,8 +3,9 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var ChartParser = (function () {
-
+var ChartParser = function () {
+    var self = this;
+    
     // global chart variables
     var horGridPeriod = 1; // 0=year, 1=month, 2=day
     var horGridSkip = 4; // the number of gridlines to skip
@@ -12,7 +13,7 @@ var ChartParser = (function () {
 
     // global XML request variables
 
-    function requestChartRates(chartPeriodInt)
+    self.requestChartRates = function (periodId, stockCode)
     {
         document.getElementById("graphMessage").innerHTML = "Requesting Chart";
         document.getElementById("graphMessage").style.display = "block";
@@ -27,7 +28,9 @@ var ChartParser = (function () {
         document.getElementById('switchRFSelect').style.opacity = "0.0";
         document.getElementById('switchRFSelect').setAttribute("onclick","switchShowRF()");
 
-        if (chartPeriodInt == 1) drawIntradayChart();
+        if (periodId === 1) {
+            drawIntradayChart(stockCode);
+        }
         else {
             var reqChart = new XMLHttpRequest();
             reqChart.onreadystatechange = function () {
@@ -44,20 +47,20 @@ var ChartParser = (function () {
                 }
             };
 
-            reqChart.open("GET", makeChartURL(chartPeriodInt), true);
+            reqChart.open("GET", makeChartURL(periodId, stockCode), true);
             reqChart.setRequestHeader("Cache-Control", "no-cache");
             reqChart.send("");
         }
     }
 
-    function drawIntradayChart() {
+    function drawIntradayChart(stockCode) {
         document.getElementById('horGrid').style.display="none";
         document.getElementById('vertGrid').style.display="none";
 
         var imageCanvas = document.getElementById('chartcanvas');
         imageCanvas.style.display = "block";
         var context = imageCanvas.getContext("2d");
-        context.clearRect(0,0,imageCanvas.offsetWidth,imageCanvas.offsetHeight);    
+        context.clearRect(0, 0, imageCanvas.offsetWidth, imageCanvas.offsetHeight);    
 
         var chartBackground = new Image(206,151);
         chartBackground.src = "images/graph_slideout.png";
@@ -85,12 +88,12 @@ var ChartParser = (function () {
             document.getElementById('graphDiv').style.visibility = "visible";
         }
 
-        chartImage.src = makeIntradayChartURL();
+        chartImage.src = makeIntradayChartURL(stockCode);
     }
 
-    function makeIntradayChartURL() {
+    function makeIntradayChartURL(stockCode) {
         //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm=" + Math.random();
-        var stockName = encodeURIComponent(Stocks[selectedStock]);
+        var stockName = encodeURIComponent(stockCode);
         var intradayChartURL = "http://ichart.yahoo.com/t?s=" + stockName + "&rndm=" + Math.random();
         return intradayChartURL;
     }
@@ -106,7 +109,7 @@ var ChartParser = (function () {
         else document.getElementById("graphMessage").innerHTML = "No data received.";
     }
 
-    function drawChart(arrayDateClose,numberOfRows,dateColumn,closeColumn) {
+    function drawChart(arrayDateClose, numberOfRows, dateColumn, closeColumn) {
         var canvas = document.getElementById("chartcanvas");
         canvas.style.display = "block";
 
@@ -230,7 +233,7 @@ var ChartParser = (function () {
         document.getElementById('graphDiv').style.visibility = "visible";
     }
 
-    function makeChartURL(chartPeriodInt) {
+    function makeChartURL(chartPeriodInt, stockCode) {
         // http://ichart.yahoo.com/table.csv? s=%5EAEX &d=3 &e=10 &f=2007 &g=d &a=9 &b=12 &c=1992 &ignore=.csv
         var timeDif = 0;
         var resolution; // daily, weekly, monthly
@@ -281,17 +284,21 @@ var ChartParser = (function () {
         }
         var today  = new Date();
         var fromDay = new Date();
-        fromDay.setTime(today-timeDif);
+        fromDay.setTime(today - timeDif);
         var todaysYear = today.getFullYear();
         var todaysMonth = today.getMonth();
         var todaysDay = today.getDate();
         var fromDaysYear = fromDay.getFullYear();
         var fromDaysMonth = fromDay.getMonth();
         var fromDaysDay = fromDay.getDate();
-        var stockName = encodeURIComponent(Stocks[selectedStock]);
+        var stockName = encodeURIComponent(stockCode);
         //var debugChartURL = "http://localhost:8888/New Euro Stocks/table6.csv";
         var chartURL = "http://ichart.yahoo.com/table.csv?s=" + stockName + "&d=" + todaysMonth + "&e=" + todaysDay + "&f=" + todaysYear + "&g=" + resolution + "&a=" + fromDaysMonth + "&b=" + fromDaysDay + "&c=" + fromDaysYear + "&ignore=.csv";
         return chartURL;
         //return debugChartURL;
     }    
-}());
+
+    function formatNumber(number, decimals) {
+        return number.toFixed(2);
+    }
+};

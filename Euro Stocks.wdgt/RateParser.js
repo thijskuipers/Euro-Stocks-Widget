@@ -3,24 +3,28 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var RateParser = (function () {
+var RateParser = function () {
     var self = this;
+    var debugEnabled = true;
         
     var debugStocksURL = "http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 
     function makeStockRateURL(arrayStockNames) {
         var stringStockNames = arrayStockNames.toString(","),
             urlStockNames = encodeURIComponent(stringStockNames),
-            stocksURL = "http://download.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1c1ohgv&e=.csv";
+            stocksURL = "http://download.finance.yahoo.com/d/quotes.csv?s=" + urlStockNames + "&f=sl1d1t1p&e=.csv";
 
         return stocksURL;
         //return debugStocksURL;
     }
 
-    // TODO: pass on the callback function
     self.requestStockRates = function (arrayStockNames, callback) {
-        if (typeof arrayStockNames !== "object" || typeof arrayStockNames.length !== "function") {
-            throw new Error("RateParser.requestStockRates");
+        if (typeof arrayStockNames != "object" || typeof arrayStockNames.length != "number") {
+            throw new Error("RateParser.requestStockRates: argument arrayStockNames not an Array");
+        }
+        
+        if (typeof callback != "function") {
+            throw new Error("RateParser.requestStockRates: argument callback not a Function");
         }
         
         var reqStocks = new XMLHttpRequest();
@@ -29,10 +33,10 @@ var RateParser = (function () {
             {
                 if (reqStocks.status == 200)
                 {
-                    parseStockRates(reqStocks.responseText);
                     if (debugEnabled) {
-                        // console.log(reqStocks.responseText);
+                        console.log(reqStocks.responseText);
                     }
+                    parseStockRates(reqStocks.responseText, callback);
                 }
                 else
                 {
@@ -42,7 +46,7 @@ var RateParser = (function () {
                 }
             }
         };
-        reqStocks.open("GET", makeStockRateURL(), true);
+        reqStocks.open("GET", makeStockRateURL(arrayStockNames), true);
         reqStocks.setRequestHeader("Cache-Control", "no-cache");
         reqStocks.send("");
 
@@ -50,8 +54,41 @@ var RateParser = (function () {
             console.log("Retrieving stock rates asynchronously");
         }
     }
+    
+    function parseDate(date, time) {
+        if (typeof date != "string") {
+            throw new Error("RateParser.parseDate: argument date not a string");
+        }
+        if (typeof time != "string") {
+            throw new Error("RateParser.parseDate: argument time not a string");
+        }
+        
+        var dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/i;
+        var timeRegex = /^(\d{1,2})\:(\d{2})([ap]m)$/i;
+        
+        var dateResult = dateRegex.exec(date);
+        var timeResult = timeRegex.exec(time);
+        
+        var day = parseInt(dateResult[2]),
+            month = parseInt(dateResult[1]),
+            year = parseInt(dateResult[3]),
+            hour = parseInt(timeResult[1]),
+            minute = parseInt(timeResult[2]),
+            amPm = timeResult[3];
+        
+        month -= 1; // convert 1-based month to zero-based
+        hour += 4; // convert EDT time to UTC
+        
+        if (amPm.toLowerCase() === "pm") {
+            hour += 12; // convert to 24h representation
+        }
+        
+        var returnDate = new Date(Date.UTC(year, month, day, hour, minute, 0));
+        
+        return returnDate;
+    }
 
-    function parseStockRates(responseStocks) {
+    function parseStockRates(responseStocks, callback) {
         var dataRows = responseStocks.split(/\r\n|\n/gi); // split response text by line endings into array
 
         if (debugEnabled) {
@@ -83,18 +120,9 @@ var RateParser = (function () {
             console.log("dataRows.length after pruning: " + dataRows.length);
         }
 
-        // Set the global accessor for the stocks data to the data rows.
-        stocksDataRows = dataRows;
-
-        var least = Math.min(dataRows.length, numberOfStocks);
-        if (debugEnabled) {
-            console.log("least: " + least);
-        }
-
-        var changeClass = "stockchangepos";
-        var percentage = 0.0;
-
-        for (var i = 0; i < least; i++) {
+        var rates = [];
+        
+        for (var i = 0, len = dataRows.length; i < len; i++) {
             // Name: 0
             // Value: 1
             // Date: 2
@@ -105,22 +133,15 @@ var RateParser = (function () {
             // Low: 7
             // Volume: 8
             var row = dataRows[i];
-            if (debugEnabled) {
-                console.log(row[0] + ": " + row[1]);
-            }
-            document.getElementById("stockbarname" + (i + 1)).innerHTML = row[0];
-            document.getElementById("stockbarvalue" + (i + 1)).innerHTML = row[1];
-            if (showPercentage) {
-                percentage = row[4] / (row[1] - row[4]) * 100;
-                document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(percentage, 2, true) + '%';
-            }
-            else {
-                document.getElementById("stockbarchange"+(i + 1)).innerHTML = formatNumber(row[4], 2, true);
-            }
-            changeClass = (parseFloat(row[4]) < 0) ? "stockchangeneg" : "stockchangepos";
-            document.getElementById("stockbarchange" + ( i + 1)).setAttribute("class", changeClass);
-            document.getElementById("stockbarclick" + (i + 1)).setAttribute("title", "Last update: " + row[2] + " " + row[3] + " EDT");
+            rates.push({
+                name: row[0],
+                value: parseFloat(row[1]),
+                datetime: parseDate(row[2], row[3]),
+                previousClose: parseFloat(row[4])
+            });
         }
+        
+        callback(rates);
     }    
 
-}());
+}

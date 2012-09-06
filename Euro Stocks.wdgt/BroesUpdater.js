@@ -3,7 +3,7 @@
 // this code may freely be used, changed and redistributed
 // when you're literally copying and using the code, please refer to the author
 
-var BroesUpdater = function() {
+var BroesUpdater = (function() {
     // private properties
     var currentVersion = "1.7",
         lastTimeUpdateCheck = 0,
@@ -86,4 +86,4 @@ var BroesUpdater = function() {
         init: init,
         currentVersion: currentVersion
     }
-}();
+}());
