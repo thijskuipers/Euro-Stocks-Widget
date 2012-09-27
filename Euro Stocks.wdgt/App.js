@@ -90,7 +90,20 @@
         
         self.isIndex = ko.computed(function () {
             return selectedStock().isIndex;
-        })
+        });
+        
+        self.switchToRisersFallers = function () {
+            self.graphSelected(false);
+
+            var rfParser = new RisersFallersParser();
+            rfParser.requestRisersFallers(selectedStock().code);
+        };
+        
+        self.switchToGraph = function () {
+            self.graphSelected(true);
+        };
+        
+        self.graphSelected = ko.observable(true);
     }
     
     function PreferencesViewModel(stocks) {
@@ -178,13 +191,11 @@
     // Subscribe to the number of stocks to update the window
     // height when it is a widget
     stocksViewModel.stocks.subscribe(function (stock) {
-        var frontHeight = 115 + 31 * stocksViewModel.stocks().length;
         if (window.widget) {
-            window.height = window.resizeTo(216, Math.min(frontHeight, backHeight));
+            var frontHeight = 115 + 31 * stocksViewModel.stocks().length;
+            window.resizeTo(216, Math.min(frontHeight, backHeight));
         }
-        console.log("New widget height: " + frontHeight);
     });
-    
     
     // Apply Knockout bindings, preferably with scope.
     ko.applyBindings(stocksViewModel, document.getElementById('stockbars'));

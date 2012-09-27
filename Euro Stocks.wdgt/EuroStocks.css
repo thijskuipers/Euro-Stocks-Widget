@@ -303,7 +303,7 @@ html, body {
 /* @group RF Table */
 
 #rfTableDiv {
-	display: block;
+	display: none;
 	position: absolute;
 	width: 184px;
 	height: 103px;
@@ -314,7 +314,6 @@ html, body {
 	bottom: 12px;
 	border-collapse: collapse;
 	overflow: hidden;
-	visibility: hidden;
 }
 
 #rfButton {
@@ -566,15 +565,13 @@ html, body {
     display: block;
 }
 
-#switchRFSelect {
+#switchRFSelect, #switchGraphSelect {
 	display: block;
 	position: absolute;
 	z-index: 5;
 	top: 6px;
 	width: 39px;
 	height: 26px;
-	margin: 0;
-	padding: 0;
 	overflow: hidden;
 	left: 8px;
 	background-image: url(images/switch_rf_select.png);
@@ -582,21 +579,13 @@ html, body {
 }
 
 #switchGraphSelect {
-	display: block;
-	position: absolute;
-	z-index: 5;
-	top: 6px;
-	width: 39px;
-	height: 26px;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
 	left: 51px;
 	background-image: url(images/switch_graph_select.png);
-	opacity: 1.0;
 }
 
-
+#switchRFSelect.selected, #switchGraphSelect.selected {
+    opacity: 1.0;
+}
 
 /* @end */
 

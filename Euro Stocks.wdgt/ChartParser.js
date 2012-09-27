@@ -22,11 +22,7 @@ var ChartParser = function () {
         document.getElementById('horGrid').style.display="none";
         document.getElementById('vertGrid').style.display="none";
 
-        document.getElementById('rfTableDiv').style.visibility = "hidden";
-        document.getElementById('switchGraphSelect').style.opacity = "1.0";
-        document.getElementById('switchGraphSelect').removeAttribute("onclick");
-        document.getElementById('switchRFSelect').style.opacity = "0.0";
-        document.getElementById('switchRFSelect').setAttribute("onclick","switchShowRF()");
+        document.getElementById('rfTableDiv').style.display = "none";
 
         if (periodId === 1) {
             drawIntradayChart(stockCode);

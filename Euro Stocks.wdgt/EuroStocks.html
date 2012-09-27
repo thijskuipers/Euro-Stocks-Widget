@@ -13,14 +13,14 @@
     
     <!-- Application files -->
     <script src="RateParser.js"></script>
-    <script src="ChartParser.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ChartParser.js"></script>
+    <script src="RisersFallersParser.js"></script>
 
     <!-- <script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
     <script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
     <script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
-    <script src="RisersFallersParser.js" type="text/javascript" charset="utf-8"></script>
      -->
 </head>
 <body> <!-- onload="setup();"> -->
@@ -39,7 +39,7 @@
             </div>           
         </div>
         
-        <div id="graphslideout"> <!-- onMouseOver="mouseOverGraph()" onMouseOut="mouseOutGraph()"> -->
+        <div id="graphslideout" data-bind="css: { isindex: isIndex() }">
             <div id="graphMessage">Message.</div>
             <div id="graphDiv">
                 <div id="selectPeriodBar" data-bind="foreach: periods">
@@ -61,8 +61,8 @@
             </div>
             
             <div id="switchRfGraph">
-                <div id="switchRFSelect" onclick="switchShowRF()"></div>
-                <div id="switchGraphSelect"></div>
+                <div id="switchRFSelect" data-bind="click: switchToRisersFallers, css: { selected: !graphSelected() }"></div>
+                <div id="switchGraphSelect" data-bind="click: switchToGraph, css: { selected: graphSelected() }"></div>
             </div>
             
             
