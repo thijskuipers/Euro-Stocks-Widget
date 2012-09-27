@@ -104,6 +104,17 @@
         };
         
         self.graphSelected = ko.observable(true);
+        
+        self.updateChart = function () {
+            var chartParser = new ChartParser();
+            chartParser.requestChartRates(self.selectedPeriod().id, selectedStock().code);        
+        };
+        
+        // Subscribe to the event when the selected period is updated.
+        // Update the chart.
+        self.selectedPeriod.subscribe(function () {
+            self.updateChart();
+        })
     }
     
     function PreferencesViewModel(stocks) {
@@ -165,26 +176,15 @@
         });
     }
     
-    function updateChart(stock) {
-        var chartParser = new ChartParser();
-        chartParser.requestChartRates(chartViewModel.selectedPeriod().id, stock.code);        
-    }
-    
     function updateRatesAndChart() {
         updateRates();
-        updateChart(stocksViewModel.selectedStock());
+        chartViewModel.updateChart();
     }
     
     // Subscribe to the event when the selectedStock is updated.
     // Update the rates and update the chart.
     stocksViewModel.selectedStock.subscribe(function (stock) {
         updateRatesAndChart();
-    });
-    
-    // Subscribe to the event when the selected period is updated.
-    // Update the chart.
-    chartViewModel.selectedPeriod.subscribe(function (period) {
-        updateChart(stocksViewModel.selectedStock());
     });
     
     var backHeight = 250;

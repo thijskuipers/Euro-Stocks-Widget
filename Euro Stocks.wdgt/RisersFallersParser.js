@@ -10,7 +10,11 @@ var RisersFallersParser = function () {
     {
         var stockName = encodeURIComponent(stockCode);
         // The z parameter allows us to download more than 50 index components (stocks) at a time
-        var url = "http://download.finance.yahoo.com/d/quotes.csv?s=@" + stockName + "&f=sl1d1t1c1ohgv&e=.csv&z=1";
+        // Three columns: 
+        //   s = Symbol
+        //   l1 = Last Trade (Price Only)
+        //   p = Previous Close
+        var url = "http://download.finance.yahoo.com/d/quotes.csv?s=@" + stockName + "&f=sl1p&e=.csv&z=1";
         //var url = "http://localhost:8888/eurostocks/quotes.csv";
 
         return url;
@@ -51,79 +55,73 @@ var RisersFallersParser = function () {
 
     function parseRF(responseText)
     {
-        var numColumns = 9;
-        responseText = responseText.replace(/\r\n|\n/gi,",");
-        var arrayRF = responseText.split(",");
-        for (var x in arrayRF) {
-            arrayRF[x] = arrayRF[x].replace(/\"/gi,"");
+        var numColumns = 3;
+        // Split the response by line ending
+        var arrayRF = responseText.split(/\r\n|\n/gi);
+        
+        // Split each row in the array into columns by comma.
+        // Use reverse loop to be able to remove the last item,
+        // without screwing up the index.
+        for (var i = arrayRF.length - 1; i >= 0; i--) {
+            arrayRF[i] = arrayRF[i].replace(/\"/g, "");
+            arrayRF[i] = arrayRF[i].split(",");
+            
+            // If the item does not exist exactly of the expected number
+            // of columns, remove the item from the array.
+            if (arrayRF[i].length != numColumns) {
+                arrayRF.splice(i, 0);
+            }
         }
-        var k = 0;
-        var l = 0;
-        var arrayRFTrueLength = Math.floor(arrayRF.length/numColumns);
-        var arrayRisers = [];
-        var arrayFallers = [];
-        var RFName;
-        var RFRate;
-        var RFChange;
-        var RFPercentage;
-        var j = 0;
 
-        for (var i = 0; i < arrayRFTrueLength; i++) {
-            j = numColumns * i;
+        var k = 0,
+            l = 0,
+            arrayRFTrueLength = arrayRF.length,
+            arrayRisers = [],
+            arrayFallers = [],
+            rfName,
+            rfRate,
+            rfChange,
+            rfPercentage;
+            
+        for (var i = 0, j = arrayRF.length; i < j; i++) {
+            rfName = arrayRF[i][0];
+            rfLastTrade = parseFloat(arrayRF[i][1]);
+            rfPreviousClose = parseFloat(arrayRF[i][2]);
+            rfChange = rfLastTrade - rfPreviousClose;
+            rfPercentage =  rfChange / rfPreviousClose * 100;
 
-            RFName = arrayRF[j];
-            RFRate = parseFloat(arrayRF[(j + 1)]);
-            RFChange = parseFloat(arrayRF[(j + 4)]);
-            RFPercentage = RFChange / (RFRate - RFChange) * 100;
-
-            if (!isNaN(RFPercentage)) {
-                if (RFChange < 0) {
-                    arrayFallers[k] = [RFName, RFPercentage];
-                    k++;
+            if (!isNaN(rfPercentage)) {
+                if (rfChange < 0) {
+                    arrayFallers[k] = { name: rfName, percentage: rfPercentage };
+                    ++k;
                 }
                 else {
-                    arrayRisers[l] = [RFName, RFPercentage];
-                    l++;
+                    arrayRisers[l] = { name: rfName, percentage: rfPercentage };
+                    ++l;
                 }
             }
         }
 
-        var arrayRisersSorted = sortMultiArrayNew(arrayRisers, false);
-        var arrayFallersSorted = sortMultiArrayNew(arrayFallers, true);
-        appendRF(arrayRisersSorted, arrayFallersSorted);
+        arrayRisers.sort(function (a, b) {
+            // Sort the risers descending.
+            return b.percentage - a.percentage; 
+        });
+        
+        arrayFallers.sort(function (a, b) {
+            // Sort the fallers ascending.
+            return a.percentage - b.percentage;
+        });
+        
+        appendRF(arrayRisers, arrayFallers);
         document.getElementById('rfTableDiv').style.display = "block";
     }
 
-    // much quicker sorting function than sortMultiArray
-    function sortMultiArrayNew(multiArray, ascending){
-        var sortedArray = [];
-        for (var i = 0; i < 7; i++) {
-            sortedArray[i] = ['broes', 0.00];
-        }
-        for (var x in multiArray) {
-            for (var y in sortedArray) {
-                if (ascending && sortedArray[y][1] > multiArray[x][1] || !ascending && sortedArray[y][1] < multiArray[x][1]) {
-                    sortedArray.pop();
-                    sortedArray.splice(y, 0, multiArray[x]);
-                    break;
-                }
-            }
-        }
-        for (var i = sortedArray.length - 1; i >= 0; i--) {
-            if (sortedArray[i][0] == 'broes') {
-                sortedArray.splice(i, 1);
-            }
-        }
-        return sortedArray;
-    }
-
-    function appendRF(arrayRisers,arrayFallers)
+    function appendRF(arrayRisers, arrayFallers)
     {
         var output = document.getElementById("rfTableBody");
-
-        while (output.hasChildNodes()) {
-            output.removeChild(output.lastChild);
-        }
+        
+        // Clear table body
+        output.innerHTML = "";
 
         var maxArrayRFLength = Math.max(arrayRisers.length, arrayFallers.length);
         var maxDisplay = Math.min(7, maxArrayRFLength);
@@ -141,9 +139,9 @@ var RisersFallersParser = function () {
             var fallerPercCell = document.createElement('td');
 
             if (i < arrayRisers.length) { // as long as Risers exist
-                riserNameCell.innerHTML = (arrayRisers[i][0] != undefined) ? arrayRisers[i][0] : "";
-                riserPercCell.innerHTML = (arrayRisers[i][1] != undefined) ? formatNumber(arrayRisers[i][1], 2) + "%" : "";
-                if (arrayRisers[i][2] == 0.0) {
+                riserNameCell.innerHTML = (typeof arrayRisers[i].name != "undefined") ? arrayRisers[i].name : "";
+                riserPercCell.innerHTML = (typeof arrayRisers[i].percentage != "undefined") ? formatNumber(arrayRisers[i].percentage, 2) + "%" : "";
+                if (arrayRisers[i].percentage == 0.0) {
                     riserPercCell.setAttribute("class", "noChange");
                 }
                 else {
@@ -152,9 +150,9 @@ var RisersFallersParser = function () {
             }
 
             if (i < arrayFallers.length) { // as long as Fallers exist
-                fallerNameCell.innerHTML = (arrayFallers[i][0] != undefined) ? arrayFallers[i][0] : "";
-                fallerPercCell.innerHTML = (arrayFallers[i][1] != undefined) ? formatNumber(arrayFallers[i][1], 2) + "%" : "";
-                if (arrayFallers[i][2] == 0.0) {
+                fallerNameCell.innerHTML = (typeof arrayFallers[i].name != "undefined") ? arrayFallers[i].name : "";
+                fallerPercCell.innerHTML = (typeof arrayFallers[i].percentage != "undefined") ? formatNumber(arrayFallers[i].percentage, 2) + "%" : "";
+                if (arrayFallers[i].percentage == 0.0) {
                     fallerPercCell.setAttribute("class","noChange");
                 }
                 else {
@@ -174,6 +172,6 @@ var RisersFallersParser = function () {
     }    
     
     function formatNumber(number, decimals) {
-        number.toFixed(decimals);
+        return number.toFixed(decimals);
     }
 };
