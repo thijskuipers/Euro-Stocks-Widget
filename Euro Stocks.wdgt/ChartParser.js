@@ -178,6 +178,8 @@ var ChartParser = function () {
 
         // array to change the monthnumber to the monthname
         var monthLabels = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        
+        // function to return the last two digits of a four digit year
         function yearLabel(year) {
             return "'" + year.slice(year.length - 2);
         }
@@ -188,6 +190,7 @@ var ChartParser = function () {
         while (xGrid.hasChildNodes()) {
             xGrid.removeChild(xGrid.lastChild);
         }
+        
         // add the horizontal grid labels
         for (var i = 0; i < (horizontalLabels.length / 2); i++) {
             var addXGrid = document.createElement("div");

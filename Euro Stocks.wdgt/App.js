@@ -90,8 +90,11 @@
     
     var chartViewModel = new ChartViewModel();
     
-    function updateStocks() {
-        var stocks = stocksViewModel.stocks(),
+    function updateRates() {
+        // Get a copy of the array using slice(0).
+        // Need a copy here, otherwise splice further below will alter
+        // the original array, which is not good. Nope.
+        var stocks = stocksViewModel.stocks().slice(0),
             stockCodes = [];
 
         for (var i = 0, len = stocks.length; i < len; i++) {
@@ -122,9 +125,19 @@
         chartParser.requestChartRates(chartViewModel.selectedPeriod().id, stock.code);        
     }
     
+    function updateRatesAndChart() {
+        updateRates();
+        updateChart(stocksViewModel.selectedStock());
+    }
+    
+    // Subscribe to the event when the selectedStock is updated.
+    // Update the rates and update the chart.
     stocksViewModel.selectedStock.subscribe(function (stock) {
-        updateStocks();
-        updateChart(stock);
+        updateRatesAndChart();
+    });
+    
+    chartViewModel.selectedPeriod.subscribe(function (period) {
+        updateChart(stocksViewModel.selectedStock());
     });
 
     ko.applyBindings(stocksViewModel, document.getElementById('stockbars'));
@@ -134,7 +147,7 @@
         stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 3.77, new Date()));
     }, 1000);
     
-    setTimeout(updateStocks, 3000);
+    setTimeout(updateRatesAndChart, 3000);
     
     // setTimeout(function() {
     //     stocksViewModel.stocks()[0].

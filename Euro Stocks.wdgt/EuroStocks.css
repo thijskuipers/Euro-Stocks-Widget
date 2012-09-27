@@ -430,6 +430,10 @@ html, body {
     padding-left: 7px;
 }
 
+#graphslideout:hover #selectPeriodBar {
+    display: block;
+}
+
 .selectPeriodLabel {
     display: block;
     width: 18px;
@@ -547,7 +551,7 @@ html, body {
 
 #switchRfGraph {
 	position: absolute;
-	display: block;
+	display: none;
 	width: 98px;
 	height: 37px;
 	margin: 0;
@@ -556,7 +560,10 @@ html, body {
 	bottom: 12px;
 	left: 55px;
 	z-index: 5;
-	visibility: hidden;
+}
+
+#graphslideout.isindex:hover #switchRfGraph {
+    display: block;
 }
 
 #switchRFSelect {

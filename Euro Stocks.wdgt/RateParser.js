@@ -27,6 +27,10 @@ var RateParser = function () {
             throw new Error("RateParser.requestStockRates: argument callback not a Function");
         }
         
+        if (arrayStockNames.length <= 0) {
+            throw new Error("RateParser.requestStockRates: array of stock names is empty");
+        }
+        
         var reqStocks = new XMLHttpRequest();
         reqStocks.onreadystatechange = function () {
             if (reqStocks.readyState == 4)
