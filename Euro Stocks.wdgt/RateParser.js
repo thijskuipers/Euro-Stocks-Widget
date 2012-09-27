@@ -5,7 +5,7 @@
 
 var RateParser = function () {
     var self = this;
-    var debugEnabled = true;
+    var debugEnabled = false;
         
     var debugStocksURL = "http://localhost:8888/New Euro Stocks/quotes2.csv"; // debug
 

@@ -69,7 +69,11 @@
         };
     }
     
-    function ChartViewModel() {
+    function ChartViewModel(selectedStock) {
+        if (typeof selectedStock != "function" || typeof selectedStock.subscribe != "function") {
+            throw new Error("ChartViewModel: selectedStock is not an observable.");
+        }
+        
         var self = this;
         
         self.periods = [
@@ -83,12 +87,40 @@
         ];
         
         self.selectedPeriod = ko.observable(self.periods[1]);
+        
+        self.isIndex = ko.computed(function () {
+            return selectedStock().isIndex;
+        })
+    }
+    
+    function PreferencesViewModel(stocks) {
+        if (typeof stocks != "function" || typeof stocks.subscribe != "function") {
+            throw new Error("PreferencesViewModel: stocks is not an observable array.");
+        }
+        
+        var self = this;
+        
+        self.addStock = function (formEl) {
+            console.log("adding stock");
+            
+            var code = formEl["stockNameField"].value.toUpperCase();
+            formEl.reset();
+            
+            stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
+            
+            // return false to prevent form from submitting
+            return false;
+        };
+        
+        self.stocks = stocks;
     }
     
     var stocksViewModel = new StocksViewModel();
     // console.log(JSON.stringify(stocksViewModel));
     
-    var chartViewModel = new ChartViewModel();
+    var chartViewModel = new ChartViewModel(stocksViewModel.selectedStock);
+    
+    var preferencesViewModel = new PreferencesViewModel(stocksViewModel.stocks);
     
     function updateRates() {
         // Get a copy of the array using slice(0).
@@ -115,7 +147,7 @@
                         break; // break the inner loop, cause a match was already found
                     }
                 }
-                console.log("Name, Value: " + rate.name + "; " + rate.value + "; " + rate.datetime);
+                // console.log("Name, Value: " + rate.name + "; " + rate.value + "; " + rate.datetime);
             }
         });
     }
@@ -136,21 +168,33 @@
         updateRatesAndChart();
     });
     
+    // Subscribe to the event when the selected period is updated.
+    // Update the chart.
     chartViewModel.selectedPeriod.subscribe(function (period) {
         updateChart(stocksViewModel.selectedStock());
     });
-
+    
+    var backHeight = 250;
+    // Subscribe to the number of stocks to update the window
+    // height when it is a widget
+    stocksViewModel.stocks.subscribe(function (stock) {
+        var frontHeight = 115 + 31 * stocksViewModel.stocks().length;
+        if (window.widget) {
+            window.height = window.resizeTo(216, Math.min(frontHeight, backHeight));
+        }
+        console.log("New widget height: " + frontHeight);
+    });
+    
+    
+    // Apply Knockout bindings, preferably with scope.
     ko.applyBindings(stocksViewModel, document.getElementById('stockbars'));
     ko.applyBindings(chartViewModel, document.getElementById('graphslideout'));
+    ko.applyBindings(preferencesViewModel, document.getElementById('back'));
     
     setTimeout(function() {
         stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 3.77, new Date()));
-    }, 1000);
+    }, 500);
     
-    setTimeout(updateRatesAndChart, 3000);
-    
-    // setTimeout(function() {
-    //     stocksViewModel.stocks()[0].
-    // }, 2000);
-    
+    setTimeout(updateRatesAndChart, 1000);
+
 }());

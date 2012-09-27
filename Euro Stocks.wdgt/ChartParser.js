@@ -100,11 +100,19 @@ var ChartParser = function () {
 
     function parseChartRates(responseText)
     {
-        responseText = responseText.replace(/(\r\n)|(\n)/gi,","); // convert line breaks (windows & unix) to commas
-        var arrayRates = responseText.split(","); // split to array by commas
-        var arrayRatesRows = Math.floor(arrayRates.length / numberOfColumns); // floor -> only entire rows (last elements are line endings)
-        if (arrayRatesRows > 5) { // only if response contains enough datapoints
-            drawChart(arrayRates, arrayRatesRows, 0, 6); // 0 -> dateColumn, 6 -> closevalueColumn
+        // convert line breaks (windows & unix) to commas
+        responseText = responseText.replace(/(\r\n)|(\n)/gi,",");
+ 
+        // split to array by commas
+        var arrayRates = responseText.split(",");
+
+        // floor -> only entire rows (last elements are line endings)
+        var arrayRatesRows = Math.floor(arrayRates.length / numberOfColumns);
+        
+        // only if response contains enough datapoints
+        if (arrayRatesRows > 5) {
+            // 0 -> dateColumn, 6 -> closevalueColumn
+            drawChart(arrayRates, arrayRatesRows, 0, 6);
         }
         else document.getElementById("graphMessage").innerHTML = "No data received.";
     }
@@ -114,16 +122,16 @@ var ChartParser = function () {
         canvas.style.display = "block";
 
         // Margins
-        var topMargin = 5;
-        var bottomMargin = 15;
-        var leftMargin = 5;
-        var rightMargin = 41;
+        var topMargin = 5,
+            bottomMargin = 15,
+            leftMargin = 5,
+            rightMargin = 41;
 
-        var canvasHeight = canvas.offsetHeight - (topMargin + bottomMargin); // real height - vertical margins
-        var canvasWidth = canvas.offsetWidth - (leftMargin + rightMargin); // real width - horizontal margin
-        var xStepSize = canvasWidth / (numberOfRows - 2); // minus 1 for first row, minus 1 for "pieces in between is one less"
-        var yMin = arrayDateClose[closeColumn + numberOfColumns]; // +numberOfColumns -> from row 2
-        var yMax = arrayDateClose[closeColumn + numberOfColumns];
+        var canvasHeight = canvas.offsetHeight - (topMargin + bottomMargin), // real height - vertical margins
+            canvasWidth = canvas.offsetWidth - (leftMargin + rightMargin), // real width - horizontal margin
+            xStepSize = canvasWidth / (numberOfRows - 2), // minus 1 for first row, minus 1 for "pieces in between is one less"
+            yMin = arrayDateClose[closeColumn + numberOfColumns], // +numberOfColumns -> from row 2
+            yMax = arrayDateClose[closeColumn + numberOfColumns];
 
         // Find minimum and maximum y(rate) value
         for (var i = 2; i < numberOfRows; i++) { // from third row (0=first row)

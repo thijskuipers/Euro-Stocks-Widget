@@ -107,10 +107,14 @@
             <div class="c3" id="back_c3"></div>
         </div>
         <div id="backContent">
-            <input type="text" name="stockNameField" value="" id="stockNameField" title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
-            <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit" onclick="addNewStock()"><br>
+            <form data-bind="submit: addStock">
+                <input type="text" name="stockNameField" value="" id="stockNameField"
+                    title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
+                <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit">
+            </form>
             
-            <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"></select>
+            <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"
+                data-bind="options: stocks, optionsText: 'code'"></select>
             <input type="submit" name="removeStockSubmit" value="Remove" id="removeStockSubmit" onClick="removeExistingStock()">
             <input type="submit" name="moveStockUpSubmit" value="Move &#x2191;" id="moveStockUpSubmit" onClick="moveStockUp()"><br>
             <input type="submit" name="moveStockDownSubmit" value="Move &#x2193;" id="moveStockDownSubmit" onClick="moveStockDown()">
