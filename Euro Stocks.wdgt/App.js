@@ -1,3 +1,5 @@
+
+
 // Create local scope
 (function () {
     // feature checks
@@ -66,6 +68,35 @@
                 selectedStock: self.selectedStock().code
             };
         };
+        
+        self.updateRates = function () {
+            // Get a copy of the array using slice(0).
+            // Need a copy here, otherwise splice further below will alter
+            // the original array, which is not good. Nope.
+            var stocks = self.stocks().slice(0),
+                stockCodes = [];
+
+            for (var i = 0, len = stocks.length; i < len; i++) {
+                stockCodes.push(stocks[i].code);
+            }
+
+            var rateParser = new RateParser();
+            rateParser.requestStockRates(stockCodes, function (values) {
+                for (var i = 0, len = values.length; i < len; i++) {
+                    var rate = values[i];
+                    for (var j = 0, jLen = stocks.length; j < jLen; j++) {
+                        var currentStock = stocks[j];
+                        if (currentStock.code.toLowerCase() === rate.name.toLowerCase()) {
+                            currentStock.value(rate.value);
+                            currentStock.previousClose(rate.previousClose);
+                            currentStock.updateDate(rate.datetime);
+                            stocks.splice(j, 1); // remove the match from the array to speed up subsequent searches
+                            break; // break the inner loop, cause a match was already found
+                        }
+                    }
+                }
+            });
+        };
     }
         
     function ChartViewModel(selectedStock) {
@@ -126,8 +157,8 @@
         self.addStock = function (formEl) {
             console.log("adding stock");
             
-            var code = formEl["stockNameField"].value.toUpperCase();
-            formEl.reset();
+            var code = self.newStockValue().toUpperCase();
+            self.newStockValue("");
             
             stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
             
@@ -135,7 +166,75 @@
             return false;
         };
         
+        // Need this to be able to bind the select list on the
+        // back of the widget.
         self.stocks = stocks;
+        
+        self.allowUpdateCheck = ko.observable(true);
+        
+        self.newStockValue = ko.observable("");
+        self.newStockValue.subscribe(function (value) {
+            if (typeof value != "string" || value.length < 2) {
+                self.showSuggestions(false);
+                self.suggestions.removeAll();
+                return;
+            }
+            var url = "http://d.yimg.com/aq/autoc?query=" + encodeURIComponent(value) + "&region=GB&lang=en-GB&callback=YAHOO.util.ScriptNodeDataSource.callbacks";
+            
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4)
+                {
+                    if (xhr.status == 200)
+                    {
+                        eval(xhr.responseText);
+                    }
+                }
+            };
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+            xhr.send("");
+        });
+        
+        self.suggestions = ko.observableArray();
+        self.showSuggestions = ko.observable(false);
+        
+        // This is a real hack, but the autosuggest feature
+        // on the Yahoo Finance page only allows a callback with
+        // the name YAHOO.util.ScriptNodeDateSource.callbacks,
+        // otherwise it will return a 404.
+        window.YAHOO = {
+            util: {
+                ScriptNodeDataSource: {
+                    callbacks: autoSuggestCallback
+                }
+            }
+        };
+        
+        function autoSuggestCallback(response) {
+            
+            self.suggestions.removeAll();
+            
+            console.log(typeof response.ResultSet);
+            console.log(typeof response.ResultSet.Result);
+            console.log(typeof response.ResultSet.Result.length);
+            
+            if (typeof response.ResultSet === "object" && typeof response.ResultSet.Result === "object" && typeof response.ResultSet.Result.length === "number") {
+                var results = response.ResultSet.Result;
+                for (var i = 0, len = results.length; i < len; i++) {
+                    var result = results[i];
+
+                    self.suggestions.push({
+                        "name": result.name,
+                        "code": result.symbol,
+                        "exchange": result.exchDisp,
+                        "type": result.typeDisp
+                    });
+                }
+            }
+            
+            self.showSuggestions(self.suggestions().length() > 0);
+        }
     }
     
     // Set up the actual viewmodel instances
@@ -143,38 +242,8 @@
     var chartViewModel = new ChartViewModel(stocksViewModel.selectedStock);
     var preferencesViewModel = new PreferencesViewModel(stocksViewModel.stocks);
     
-    function updateRates() {
-        // Get a copy of the array using slice(0).
-        // Need a copy here, otherwise splice further below will alter
-        // the original array, which is not good. Nope.
-        var stocks = stocksViewModel.stocks().slice(0),
-        stockCodes = [];
-        
-        for (var i = 0, len = stocks.length; i < len; i++) {
-            stockCodes.push(stocks[i].code);
-        }
-        
-        var rateParser = new RateParser();
-        rateParser.requestStockRates(stockCodes, function (values) {
-            for (var i = 0, len = values.length; i < len; i++) {
-                var rate = values[i];
-                for (var j = 0, jLen = stocks.length; j < jLen; j++) {
-                    var currentStock = stocks[j];
-                    if (currentStock.code.toLowerCase() === rate.name.toLowerCase()) {
-                        currentStock.value(rate.value);
-                        currentStock.previousClose(rate.previousClose);
-                        currentStock.updateDate(rate.datetime);
-                        stocks.splice(j, 1); // remove the match from the array to speed up subsequent searches
-                        break; // break the inner loop, cause a match was already found
-                    }
-                }
-                // console.log("Name, Value: " + rate.name + "; " + rate.value + "; " + rate.datetime);
-            }
-        });
-    }
-    
     function updateRatesAndChart() {
-        updateRates();
+        stocksViewModel.updateRates();
         chartViewModel.updateChart();
     }
     
@@ -183,9 +252,6 @@
     stocksViewModel.selectedStock.subscribe(function (stock) {
         updateRatesAndChart();
     });
-    
-    
-    var front, back;
     
     function showPrefs(frontEl, backEl) {
         if (window.widget) {
@@ -203,7 +269,6 @@
     }
     
     function hidePrefs(frontEl, backEl) {
-
         if (window.widget) {
             widget.prepareForTransition("ToFront");
         }
@@ -214,9 +279,10 @@
         if (window.widget) {
             setTimeout(function () {
                 widget.performTransition();
-                updateRatesAndChart();
             }, 0);
         }
+
+        updateRatesAndChart();
     }
     
     // Call this when the DOM is ready to set up bindings and UI.

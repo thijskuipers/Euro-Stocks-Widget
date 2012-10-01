@@ -116,24 +116,39 @@
         <div id="backContent">
             <form data-bind="submit: addStock">
                 <input type="text" name="stockNameField" value="" id="stockNameField"
+                    data-bind="value: newStockValue, valueUpdate: 'afterkeydown'"
                     title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
                 <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit">
             </form>
             
             <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"
-                data-bind="options: stocks, optionsText: 'code'"></select>
+                data-bind="options: stocks, optionsText: 'code'">
+            </select>
+            
             <input type="submit" name="removeStockSubmit" value="Remove" id="removeStockSubmit" onClick="removeExistingStock()">
             <input type="submit" name="moveStockUpSubmit" value="Move &#x2191;" id="moveStockUpSubmit" onClick="moveStockUp()"><br>
             <input type="submit" name="moveStockDownSubmit" value="Move &#x2193;" id="moveStockDownSubmit" onClick="moveStockDown()">
+            
             <div id="updateInfo">
                 <div id="updateText">Check for updates: </div>
-                <input type="checkbox" name="updateCheckbox" id="updateCheckbox" checked="checked" onClick="updateCheckbox()"><br>
+                <input type="checkbox" name="updateCheckbox" id="updateCheckbox" data-bind="checked: allowUpdateCheck"><br>
                 <div id="updateFeedback"></div>
             </div>
         </div>
         <img class="urlLink" id="yahooURL"src="images/yahoofinancegrey.png" alt="Yahoo Finance" title="Go to Yahoo! Finance UK" onclick="openSite('http://uk.finance.yahoo.com')">
         <img class="urlLink" id="broesURL"src="images/broesurl.png" alt="Broes.nl" title="Go to Broes.nl" onclick="openSite('http://www.broes.nl')">
         <div id="doneButton"></div>
+        
+        <div id="autosuggeststocks" data-bind="foreach: suggestions, visible: showSuggestions">
+            <div class="suggestion">
+                <span data-bind="text: code"></span>
+                -
+                <span data-bind="text: name"></span>
+                -
+                <span data-bind="text: exchange"></span>
+                (<span data-bind="text: type"></span>)
+            </div>
+        </div>
     </div>
     
     <div id="updatepanel">

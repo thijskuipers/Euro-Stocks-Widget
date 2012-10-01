@@ -1,6 +1,7 @@
 html, body {
 	margin: 0;
 	padding: 0;
+	font-family: "Helvetica Neue";
 }
 /* @group Background */
 
@@ -746,6 +747,26 @@ html, body {
 	margin: 0;
 	padding: 0;
 	line-height: 13px;
+}
+
+#autosuggeststocks {
+    position: absolute;
+    left: 16px;
+    top: 37px;
+    background: yellow;
+    z-index: 100;
+    font-size: 13px;
+    width: 184px;
+    box-shadow: 0 4px 8px black;
+    padding: 1px;
+}
+
+#autosuggeststocks .suggestion {
+    padding: 3px 4px;
+}
+
+#autosuggeststocks .suggestion:nth-child(odd) {
+    background: red;
 }
 
 /* @end */
