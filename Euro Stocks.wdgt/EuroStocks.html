@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>EuroStocks</title>
-	<meta name="generator" content="TextMate http://macromates.com/">
-	<meta name="author" content="Broes http://www.broes.nl">
-
-	<link rel="stylesheet" href="EuroStocks.css">	
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>EuroStocks</title>
+    <meta name="generator" content="TextMate http://macromates.com/">
+    <meta name="author" content="Broes http://www.broes.nl">
+    
+    <link rel="stylesheet" href="EuroStocks.css">
+    
     <!-- Libs -->
     <script src="libs/json2.js"></script>
     <script src="libs/knockout-2.1.0.js"></script>
     
-    <!-- Application files -->
+    <!-- Widget scripts -->
     <script src="RateParser.js"></script>
     <script src="ChartParser.js"></script>
     <script src="RisersFallersParser.js"></script>
-
-    <!-- <script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js" type="text/javascript" charset="utf-8"></script>
+    
+    <!-- Apple widget scripts -->
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleButton.js"></script>
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js"></script>
+    <script src="/System/Library/WidgetResources/AppleClasses/AppleAnimator.js"></script>
+    
+    <!-- Widget start and bindings script -->
+    <script src="App.js"></script>
+    
+    <!--
+    <script src="EuroStocks.js" type="text/javascript" charset="utf-8"></script>
     <script src="BroesUpdater.js" type="text/javascript" charset="utf-8"></script>
-     -->
+    -->
 </head>
-<body> <!-- onload="setup();"> -->
+<body>
     <div id="front">
         <div id="topbar">
             <div id="topbartop"></div>
@@ -138,6 +145,5 @@
         <div id="btnUpdateYes"></div>
     </div>
 
-    <script src="App.js"></script>
 </body>
 </html>
