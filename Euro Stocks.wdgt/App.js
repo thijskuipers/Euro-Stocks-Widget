@@ -233,7 +233,7 @@
                 }
             }
             
-            self.showSuggestions(self.suggestions().length() > 0);
+            self.showSuggestions(self.suggestions().length > 0);
         }
     }
     
