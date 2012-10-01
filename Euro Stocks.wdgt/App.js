@@ -160,6 +160,11 @@
             var code = self.newStockValue().toUpperCase();
             self.newStockValue("");
             
+            // Reset the state of the auto-suggestions
+            self.suggestions.removeAll();
+            self.showSuggestions(false);
+            self.selectedSuggestion(false);
+            
             stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
             
             // return false to prevent form from submitting
@@ -198,9 +203,10 @@
         
         self.suggestions = ko.observableArray();
         self.showSuggestions = ko.observable(false);
+        self.selectedSuggestion = ko.observable();
         
-        // This is a real hack, but the autosuggest feature
-        // on the Yahoo Finance page only allows a callback with
+        // This is a real hack, but the JSONP autosuggest feature
+        // on the Yahoo Finance site only allows a callback with
         // the name YAHOO.util.ScriptNodeDateSource.callbacks,
         // otherwise it will return a 404.
         window.YAHOO = {
@@ -212,13 +218,10 @@
         };
         
         function autoSuggestCallback(response) {
-            
+            // Empty suggestions array
             self.suggestions.removeAll();
             
-            console.log(typeof response.ResultSet);
-            console.log(typeof response.ResultSet.Result);
-            console.log(typeof response.ResultSet.Result.length);
-            
+            // Check the response for validity
             if (typeof response.ResultSet === "object" && typeof response.ResultSet.Result === "object" && typeof response.ResultSet.Result.length === "number") {
                 var results = response.ResultSet.Result;
                 for (var i = 0, len = results.length; i < len; i++) {
@@ -233,6 +236,7 @@
                 }
             }
             
+            // Show or hide the suggestions based on 
             self.showSuggestions(self.suggestions().length > 0);
         }
     }
