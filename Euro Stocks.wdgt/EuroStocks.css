@@ -708,10 +708,30 @@ html, body {
 
 #selectStock {
     float: left;
-	width: 100px;
-	margin: 0;
-	padding: 2px;
+	width: 176px;
+	height: 80px;
 	z-index: 2;
+	font-size: .75em;
+	background-color: #CCD7FF;
+	box-shadow: 0 4px 8px black;
+}
+
+#selectStock .stock {
+    padding: 2px 4px;
+	background-color: #CCD7FF;
+}
+
+#selectStock .stock:nth-child(odd) {
+    background-color: #A3B7FF;
+}
+
+#selectStock .stock a {
+    display: none;
+    float: right;
+}
+
+#selectStock .stock:hover a {
+    display: block;
 }
 
 #updateInfo {

@@ -165,6 +165,14 @@
                 return;
             }
             
+            // Check whether the code already exists
+            var stocks = self.stocks();
+            for (var i = 0, len = stocks.length; i < len; i++) {
+                if (stocks[i].code === code) {
+                    return;
+                }
+            }
+            
             self.newStockValue("");
 
             // Reset the state of the auto-suggestions
@@ -383,6 +391,11 @@
                 clearTimeout(hideTimeout);
                 hideTimeout = null;
             }
+        };
+        
+        self.removeStock = function (stock) {
+            console.log("remove");
+            self.stocks.remove(stock);
         };
     }
     
