@@ -1,5 +1,3 @@
-
-
 // Create local scope
 (function () {
     // feature checks
@@ -169,6 +167,7 @@
             var stocks = self.stocks();
             for (var i = 0, len = stocks.length; i < len; i++) {
                 if (stocks[i].code === code) {
+                    console.log("stock already exists: " + stocks[i].code);
                     return;
                 }
             }
@@ -180,7 +179,7 @@
             self.showSuggestions(false);
             self.selectedSuggestion(false);
             
-            stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
+            self.stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
             
             return;
         };
@@ -341,7 +340,7 @@
                     // If selected index is smaller than zero,
                     // select the first item
                     if (index < 0) {
-                        userSuppliedValue = self.newStockValue();
+                        userSuppliedStockValue = self.newStockValue();
                         self.selectedSuggestion(self.suggestions()[0]);
                         self.newStockValue(self.selectedSuggestion().code);
                     }                    
@@ -354,7 +353,7 @@
                     // If selected index is the last item (or larger?), select none.
                     else {
                         self.selectedSuggestion(false);
-                        self.newStockValue(userSuppliedValue);
+                        self.newStockValue(userSuppliedStockValue);
                     }
                     
                     return;
@@ -374,6 +373,14 @@
         
         self.clickSuggestion = function (suggestion) {
             self.selectedSuggestion(suggestion);
+            self.stocks.push(new Stock(suggestion.code, suggestion.code, 0, 0, new Date()));
+            setTimeout(function () {
+                self.showSuggestions(false);
+                self.suggestions.removeAll();
+                self.selectedSuggestion(false);
+                self.newStockValue("");
+                document.getElementById("stockNameField").focus();
+            }, 300);
         };
         
         var hideTimeout = null;
@@ -394,8 +401,43 @@
         };
         
         self.removeStock = function (stock) {
-            console.log("remove");
+            // If there is just one stock left, don't allow 
+            // removal of the last one.
+            if (self.stocks().length < 2) {
+                return;
+            }
+            
             self.stocks.remove(stock);
+        };
+        
+        self.moveUp = function (stock) {
+            // If it's the first item, abort.
+            var index = self.stocks.indexOf(stock);
+            if (index <= 0) {
+                return;
+            }
+            
+            // Remove the stock and add it a position before
+            // the original position.
+            var removedStock = self.stocks.remove(stock);
+            self.stocks.splice(index - 1, 0, removedStock[0]);
+            
+            console.log("move up: " + stock.code);
+        };
+        
+        self.moveDown = function (stock) {
+            // If it's the last item, abort.
+            var index = self.stocks.indexOf(stock);
+            if (index >= self.stocks().length - 1) {
+                return;
+            }
+            
+            // Remove the stock and add it a position after
+            // the oringal position.
+            var removedStock = self.stocks.remove(stock);
+            self.stocks.splice(index + 1, 0, removedStock[0]);
+            
+            console.log("move down: " + stock.code);
         };
     }
     
@@ -473,17 +515,25 @@
             
             var backHeight = 250;
             // Subscribe to the number of stocks to update the window
-            // height when it is a widget
+            // height when it is a widget.
             stocksViewModel.stocks.subscribe(function (stock) {
                 var frontHeight = 115 + 31 * stocksViewModel.stocks().length;
-                window.resizeTo(216, Math.min(frontHeight, backHeight));
+                window.resizeTo(216, Math.max(frontHeight, backHeight));
             });
             
+            // When the widget is shown, update the rates and chart.
             widget.onshow = function () {
                 updateRatesAndChart();
             };
             
-            
+        }
+    }
+    
+    // DOMContentLoaded function that removes itself.
+    function domContentLoaded() {
+        if (document.addEventListener) {
+            document.removeEventListener("DOMContentLoaded", domContentLoaded, false);
+            ready();
         }
     }
     
@@ -499,14 +549,7 @@
         isReady = true;
         bootstrapApp();
         bootstrapWidget();
-    }
-    
-    // DOMContentLoaded function that removes itself.
-    function domContentLoaded() {
-        if (document.addEventListener) {
-            document.removeEventListener("DOMContentLoaded", domContentLoaded, false);
-            ready();
-        }
+        updateRatesAndChart();
     }
     
     // Document ready handling based on jQuery 1.8.2
@@ -517,11 +560,5 @@
         // A fallback to window.onload, that will always work
         window.addEventListener("load", ready, false);
     }
-    
-    setTimeout(function () {
-        stocksViewModel.stocks.push(new Stock("TOM2.AS", "TOM2.AS", 3.44, 3.77, new Date()));
-    }, 500);
-    
-    setTimeout(updateRatesAndChart, 1000);
     
 }());

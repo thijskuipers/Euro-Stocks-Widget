@@ -124,9 +124,11 @@
             <div id="selectStock" data-bind="foreach: stocks">
                 <div class="stock">
                     <span data-bind="text: code"></span>
-                    <a data-bind="click: $root.moveUp">move up</a>
-                    <a data-bind="click: $root.moveDown">move down</a>
-                    <a data-bind="click: $root.removeStock" class="remove">remove</a>
+                    <div class="controls">
+                        <a data-bind="click: $root.moveUp" class="moveup">move up</a>
+                        <a data-bind="click: $root.moveDown" class="movedown">move down</a>
+                        <a data-bind="click: $root.removeStock" class="remove">remove</a>
+                    </div>
                 </div>
             </div>
             <!-- <select name="selectStock" id="selectStock" multiple="multiple" size="6" title="Select one or more stocks to remove, then click Remove!"

@@ -708,12 +708,14 @@ html, body {
 
 #selectStock {
     float: left;
-	width: 176px;
+	width: 174px;
 	height: 80px;
 	z-index: 2;
 	font-size: .75em;
 	background-color: #CCD7FF;
-	box-shadow: 0 4px 8px black;
+    border: 1px solid black;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 #selectStock .stock {
@@ -725,13 +727,41 @@ html, body {
     background-color: #A3B7FF;
 }
 
-#selectStock .stock a {
-    display: none;
+#selectStock .stock .controls {
     float: right;
+    overflow: hidden;
+    display: none;
 }
 
-#selectStock .stock:hover a {
+#selectStock .stock:hover .controls {
     display: block;
+}
+
+#selectStock .stock a {
+    float: left;
+    text-indent: -9999em;
+    width: 1em;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-color: black;
+}
+
+#selectStock .stock .moveup {
+    -webkit-mask-image: url("images/27-circle-north.png");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 1em;
+}
+
+#selectStock .stock .movedown {
+    -webkit-mask-image: url("images/23-circle-south.png");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 1em;
+}
+
+#selectStock .stock .remove {
+    -webkit-mask-image: url("images/31-circle-x.png");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 1em;
 }
 
 #updateInfo {
