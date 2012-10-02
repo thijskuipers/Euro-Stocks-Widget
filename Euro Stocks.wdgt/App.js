@@ -214,13 +214,13 @@
             }
         };
         
-        self.newStockValue = ko.observable("");
-        self.newStockValue.subscribe(function (value) {
+        function retrieveSuggestions(value) {
             if (typeof value != "string" || value.length < 2) {
                 self.showSuggestions(false);
                 self.suggestions.removeAll();
                 return;
             }
+            
             var url = "http://d.yimg.com/aq/autoc?query=" + encodeURIComponent(value) + "&region=GB&lang=en-GB&callback=YAHOO.util.ScriptNodeDataSource.callbacks";
             
             var xhr = new XMLHttpRequest();
@@ -236,13 +236,20 @@
             xhr.open("GET", url, true);
             xhr.setRequestHeader("Cache-Control", "no-cache");
             xhr.send(null);
-        });
+        }
+        
+        self.newStockValue = ko.observable("");
+        self.newStockValue.subscribe(retrieveSuggestions);
         
         self.suggestions = ko.observableArray();
         self.showSuggestions = ko.observable(false);
-        self.selectedSuggestion = ko.observable();
+        self.selectedSuggestion = ko.observable(false);
+        self.selectedIndex = ko.computed(function () {
+            return self.suggestions.indexOf(self.selectedSuggestion());
+        });
         
         var keyCode = {
+            "ESC": 27,
             "UP": 38,
             "DOWN": 40
         }
@@ -251,13 +258,61 @@
         
         self.keydownStockInput = function (data, event) {
             if (!event.altKey && !event.ctrlKey && ! event.shiftKey) {
+
                 if(event.keyCode === keyCode.UP) { // up arrow key
-                    console.log("up");
+                    
+                    // Up arrow is moving up the list, smaller index
+                    var index = self.selectedIndex(),
+                        length = self.suggestions().length;
+                    
+                    // If selected index is larger than the first item,
+                    // select the previous suggestion.
+                    if (index > 0) {
+                        self.selectedSuggestion(self.suggestions()[--index]);
+                    }
+                    // If selected index is the first item, select none.
+                    else if (index === 0) {
+                        self.selectedSuggestion(false);
+                    }
+                    // If selected index is smaller than zero,
+                    // select the last suggestion.
+                    else {
+                        self.selectedSuggestion(self.suggestions()[length - 1]);
+                    }
+                    
                     return;
                 }
+
                 else if (event.keyCode === keyCode.DOWN) { // down arrow key
-                    console.log("down");
+                    
+                    // Down arrow is moving down the list, larger index
+                    var index = self.selectedIndex(),
+                        length = self.suggestions().length;
+                    
+                    // If selected index is smaller than array length,
+                    // select the next suggestion.
+                    if (index < length - 1) {
+                        self.selectedSuggestion(self.suggestions()[++index]);
+                    }
+                    // If selected index is the last item, select none.
+                    else if (index === length - 1) {
+                        self.selectedSuggestion(false);
+                    }
+                    // If selected index is larger than the array's length,
+                    // select the first suggestion. (Shouldn't happen...)
+                    else {
+                        self.selectedSuggestion(self.suggestions()[0]);
+                    }
+                    
                     return;
+                }
+                
+                else if (event.keyCode === keyCode.ESC) {
+                    self.showSuggestions(false);
+                }
+                
+                else {
+                    console.log("keyCode: " + event.keyCode);
                 }
             }
             return true;

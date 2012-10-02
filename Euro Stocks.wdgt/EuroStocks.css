@@ -763,10 +763,17 @@ html, body {
 
 #autosuggeststocks .suggestion {
     padding: 3px 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 #autosuggeststocks .suggestion:nth-child(odd) {
     background: red;
+}
+
+#autosuggeststocks .suggestion.selected {
+    background: green;
 }
 
 /* @end */
