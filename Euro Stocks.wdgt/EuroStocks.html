@@ -116,7 +116,7 @@
         <div id="backContent">
             <form data-bind="submit: addStock">
                 <input type="text" name="stockNameField" value="" id="stockNameField"
-                    data-bind="value: newStockValue, valueUpdate: 'afterkeydown'"
+                    data-bind="value: newStockValue, valueUpdate: 'afterkeydown', event: { keydown: keydownStockInput }"
                     title="Stock code should be of format ^FTSE for indices, AAPL for U.S. stocks and AABA.AS for European stocks. Go to the Yahoo! Finance site for the exact format.">
                 <input type="submit" name="stockNameSubmit" value="Add!" id="stockNameSubmit">
             </form>
@@ -140,7 +140,7 @@
         <div id="doneButton"></div>
         
         <div id="autosuggeststocks" data-bind="foreach: suggestions, visible: showSuggestions">
-            <div class="suggestion">
+            <div class="suggestion" data-bind="css: { selected: $data === $root.selectedSuggestion() }">
                 <span data-bind="text: code"></span>
                 -
                 <span data-bind="text: name"></span>

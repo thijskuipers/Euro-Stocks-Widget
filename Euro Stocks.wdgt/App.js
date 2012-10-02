@@ -177,46 +177,8 @@
         
         self.allowUpdateCheck = ko.observable(true);
         
-        self.newStockValue = ko.observable("");
-        self.newStockValue.subscribe(function (value) {
-            if (typeof value != "string" || value.length < 2) {
-                self.showSuggestions(false);
-                self.suggestions.removeAll();
-                return;
-            }
-            var url = "http://d.yimg.com/aq/autoc?query=" + encodeURIComponent(value) + "&region=GB&lang=en-GB&callback=YAHOO.util.ScriptNodeDataSource.callbacks";
-            
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4)
-                {
-                    if (xhr.status == 200)
-                    {
-                        eval(xhr.responseText);
-                    }
-                }
-            };
-            xhr.open("GET", url, true);
-            xhr.setRequestHeader("Cache-Control", "no-cache");
-            xhr.send("");
-        });
-        
-        self.suggestions = ko.observableArray();
-        self.showSuggestions = ko.observable(false);
-        self.selectedSuggestion = ko.observable();
-        
-        // This is a real hack, but the JSONP autosuggest feature
-        // on the Yahoo Finance site only allows a callback with
-        // the name YAHOO.util.ScriptNodeDateSource.callbacks,
-        // otherwise it will return a 404.
-        window.YAHOO = {
-            util: {
-                ScriptNodeDataSource: {
-                    callbacks: autoSuggestCallback
-                }
-            }
-        };
-        
+        // This will be called using by the autosuggest
+        // JSONP callback function.
         function autoSuggestCallback(response) {
             // Empty suggestions array
             self.suggestions.removeAll();
@@ -239,6 +201,69 @@
             // Show or hide the suggestions based on 
             self.showSuggestions(self.suggestions().length > 0);
         }
+        
+        // This is a real hack, but the JSONP autosuggest feature
+        // on the Yahoo Finance site only allows a callback with
+        // the name YAHOO.util.ScriptNodeDateSource.callbacks,
+        // otherwise it will return a 404.
+        window.YAHOO = {
+            util: {
+                ScriptNodeDataSource: {
+                    callbacks: autoSuggestCallback
+                }
+            }
+        };
+        
+        self.newStockValue = ko.observable("");
+        self.newStockValue.subscribe(function (value) {
+            if (typeof value != "string" || value.length < 2) {
+                self.showSuggestions(false);
+                self.suggestions.removeAll();
+                return;
+            }
+            var url = "http://d.yimg.com/aq/autoc?query=" + encodeURIComponent(value) + "&region=GB&lang=en-GB&callback=YAHOO.util.ScriptNodeDataSource.callbacks";
+            
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4)
+                {
+                    if (xhr.status == 200)
+                    {
+                        eval(xhr.responseText);
+                    }
+                }
+            };
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+            xhr.send(null);
+        });
+        
+        self.suggestions = ko.observableArray();
+        self.showSuggestions = ko.observable(false);
+        self.selectedSuggestion = ko.observable();
+        
+        var keyCode = {
+            "UP": 38,
+            "DOWN": 40
+        }
+        
+        var userSuppliedValue = "";
+        
+        self.keydownStockInput = function (data, event) {
+            if (!event.altKey && !event.ctrlKey && ! event.shiftKey) {
+                if(event.keyCode === keyCode.UP) { // up arrow key
+                    console.log("up");
+                    return;
+                }
+                else if (event.keyCode === keyCode.DOWN) { // down arrow key
+                    console.log("down");
+                    return;
+                }
+            }
+            return true;
+        };
+        
+
     }
     
     // Set up the actual viewmodel instances
