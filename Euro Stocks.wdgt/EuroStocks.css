@@ -753,12 +753,13 @@ html, body {
     position: absolute;
     left: 16px;
     top: 37px;
-    background: yellow;
+    background-color: #CCD7FF;
     z-index: 100;
     font-size: 13px;
     width: 184px;
     box-shadow: 0 4px 8px black;
     padding: 1px;
+    cursor: pointer;
 }
 
 #autosuggeststocks .suggestion {
@@ -769,11 +770,20 @@ html, body {
 }
 
 #autosuggeststocks .suggestion:nth-child(odd) {
-    background: red;
+    background-color: #A3B7FF;
+}
+
+#autosuggeststocks .suggestion:hover {
+    background-color: #7D99FF;
 }
 
 #autosuggeststocks .suggestion.selected {
-    background: green;
+    background-color: #5479FF;
+    color: white;
+}
+
+#autosuggeststocks .suggestion.selected:hover {
+    background-color: #2E5BFF;
 }
 
 /* @end */

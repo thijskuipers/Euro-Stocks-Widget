@@ -158,8 +158,15 @@
             console.log("adding stock");
             
             var code = self.newStockValue().toUpperCase();
-            self.newStockValue("");
             
+            // Check for too short stock symbol, return
+            // when too short, don't do anything else.
+            if (code.length < 2) {
+                return;
+            }
+            
+            self.newStockValue("");
+
             // Reset the state of the auto-suggestions
             self.suggestions.removeAll();
             self.showSuggestions(false);
@@ -167,8 +174,7 @@
             
             stocks.push(new Stock(code, code, 0.00, 0.00, new Date()));
             
-            // return false to prevent form from submitting
-            return false;
+            return;
         };
         
         // Need this to be able to bind the select list on the
@@ -214,10 +220,18 @@
             }
         };
         
+        var suppressRetrieveSuggestions = false;
+        
         function retrieveSuggestions(value) {
+            if (suppressRetrieveSuggestions) {
+                suppressRetrieveSuggestions = false;
+                return;
+            }
+            
             if (typeof value != "string" || value.length < 2) {
                 self.showSuggestions(false);
                 self.suggestions.removeAll();
+                self.selectedSuggestion(false);
                 return;
             }
             
@@ -252,14 +266,26 @@
             "ESC": 27,
             "UP": 38,
             "DOWN": 40
-        }
+        };
         
-        var userSuppliedValue = "";
+        var userSuppliedStockValue = "";
         
         self.keydownStockInput = function (data, event) {
             if (!event.altKey && !event.ctrlKey && ! event.shiftKey) {
-
+                var value = self.newStockValue();
+                
                 if(event.keyCode === keyCode.UP) { // up arrow key
+                    suppressRetrieveSuggestions = true;
+                    
+                    if (typeof value != "string" || value.length < 2) {
+                        return;
+                    }
+                    
+                    if (self.suggestions().length <= 0) {
+                        return;
+                    }
+                    
+                    self.showSuggestions(true);
                     
                     // Up arrow is moving up the list, smaller index
                     var index = self.selectedIndex(),
@@ -269,39 +295,58 @@
                     // select the previous suggestion.
                     if (index > 0) {
                         self.selectedSuggestion(self.suggestions()[--index]);
+                        self.newStockValue(self.selectedSuggestion().code);
                     }
                     // If selected index is the first item, select none.
                     else if (index === 0) {
                         self.selectedSuggestion(false);
+                        self.newStockValue(userSuppliedStockValue);
                     }
                     // If selected index is smaller than zero,
                     // select the last suggestion.
                     else {
+                        userSuppliedStockValue = self.newStockValue();
                         self.selectedSuggestion(self.suggestions()[length - 1]);
+                        self.newStockValue(self.selectedSuggestion().code);
                     }
                     
                     return;
                 }
-
+                
                 else if (event.keyCode === keyCode.DOWN) { // down arrow key
+                    suppressRetrieveSuggestions = true;
+                    
+                    if (typeof value != "string" || value.length < 2) {
+                        return;
+                    }
+                    
+                    if (self.suggestions().length <= 0) {
+                        return;
+                    }
+                    
+                    self.showSuggestions(true);
                     
                     // Down arrow is moving down the list, larger index
                     var index = self.selectedIndex(),
                         length = self.suggestions().length;
                     
+                    // If selected index is smaller than zero,
+                    // select the first item
+                    if (index < 0) {
+                        userSuppliedValue = self.newStockValue();
+                        self.selectedSuggestion(self.suggestions()[0]);
+                        self.newStockValue(self.selectedSuggestion().code);
+                    }                    
                     // If selected index is smaller than array length,
                     // select the next suggestion.
-                    if (index < length - 1) {
+                    else if (index < length - 1) {
                         self.selectedSuggestion(self.suggestions()[++index]);
+                        self.newStockValue(self.selectedSuggestion().code);
                     }
-                    // If selected index is the last item, select none.
-                    else if (index === length - 1) {
-                        self.selectedSuggestion(false);
-                    }
-                    // If selected index is larger than the array's length,
-                    // select the first suggestion. (Shouldn't happen...)
+                    // If selected index is the last item (or larger?), select none.
                     else {
-                        self.selectedSuggestion(self.suggestions()[0]);
+                        self.selectedSuggestion(false);
+                        self.newStockValue(userSuppliedValue);
                     }
                     
                     return;
@@ -309,16 +354,36 @@
                 
                 else if (event.keyCode === keyCode.ESC) {
                     self.showSuggestions(false);
+                    self.selectedSuggestion(false);
                 }
                 
-                else {
-                    console.log("keyCode: " + event.keyCode);
-                }
+                // else {
+                //     console.log("keyCode: " + event.keyCode);
+                // }
             }
             return true;
         };
         
-
+        self.clickSuggestion = function (suggestion) {
+            self.selectedSuggestion(suggestion);
+        };
+        
+        var hideTimeout = null;
+        
+        self.blurStockInput = function () {
+            hideTimeout = setTimeout(function () {
+                self.showSuggestions(false);
+                self.selectedSuggestion(false);
+                hideTimeout = null;
+            }, 500);
+        };
+        
+        self.focusStockInput = function () {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        };
     }
     
     // Set up the actual viewmodel instances
