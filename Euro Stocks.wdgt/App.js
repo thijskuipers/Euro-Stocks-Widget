@@ -584,15 +584,6 @@
                 updateRatesAndChart();
             };
             
-            function printCharCodes(s) {
-                var c = "";
-                for (var i = 0, len = s.length; i < len; i++) {
-                    c += s.charCodeAt(i) + ", ";
-                }
-                
-                console.log(s + ": " + c );
-            }
-            
             // Function to retrieve saved preferences at startup
             // to initialize the widget.
             function retrieveStartupPreferences() {
