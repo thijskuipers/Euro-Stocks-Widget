@@ -4,69 +4,50 @@
 // when you're literally copying and using the code, please refer to the author
 
 var ChartParser = function () {
-    var self = this;
-    
+    var self = this,
+
     // global chart variables
-    var horGridPeriod = 1; // 0=year, 1=month, 2=day
-    var horGridSkip = 4; // the number of gridlines to skip
-    var numberOfColumns = 7; // number of columns in data array
+        horGridPeriod = 1, // 0=year, 1=month, 2=day
+        horGridSkip = 4, // the number of gridlines to skip
+        numberOfColumns = 7, // number of columns in data array
 
-    // global XML request variables
+        graphMessageEl = document.getElementById("graphMessage"),
+        chartCanvasEl = document.getElementById("chartcanvas"),
+        graphDivEl = document.getElementById("graphDiv"),
+        horGridEl = document.getElementById("horGrid"),
+        vertGridEl = document.getElementById("vertGrid"),
+        rfTableDivEl = document.getElementById("rfTableDiv");
 
-    self.requestChartRates = function (periodId, stockCode)
-    {
-        document.getElementById("graphMessage").innerHTML = "Requesting Chart";
-        document.getElementById("graphMessage").style.display = "block";
-        document.getElementById("chartcanvas").style.display = "none";
-        document.getElementById('graphDiv').style.visibility = "visible";
-        document.getElementById('horGrid').style.display="none";
-        document.getElementById('vertGrid').style.display="none";
+    function formatNumber(number, decimals) {
+        return number.toFixed(decimals || 2);
+    }
 
-        document.getElementById('rfTableDiv').style.display = "none";
-
-        if (periodId === 1) {
-            drawIntradayChart(stockCode);
-        }
-        else {
-            var reqChart = new XMLHttpRequest();
-            reqChart.onreadystatechange = function () {
-                if (reqChart.readyState == 4)
-                {
-                    if (reqChart.status == 200)
-                    {
-                        parseChartRates(reqChart.responseText);
-                    }
-                    else
-                    {
-                        document.getElementById("graphMessage").innerHTML = "Chart not available";
-                    }
-                }
-            };
-
-            reqChart.open("GET", makeChartURL(periodId, stockCode), true);
-            reqChart.setRequestHeader("Cache-Control", "no-cache");
-            reqChart.send("");
-        }
+    function makeIntradayChartURL(stockCode) {
+        //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm = " + Math.random();
+        var stockName = encodeURIComponent(stockCode);
+        var intradayChartURL = "http://ichart.yahoo.com/t?s = " + stockName + "&rndm = " + Math.random();
+        return intradayChartURL;
     }
 
     function drawIntradayChart(stockCode) {
-        document.getElementById('horGrid').style.display="none";
-        document.getElementById('vertGrid').style.display="none";
+        horGridEl.style.display = "none";
+        vertGridEl.style.display = "none";
 
-        var imageCanvas = document.getElementById('chartcanvas');
+        var imageCanvas = chartCanvasEl,
+            context = imageCanvas.getContext("2d");
         imageCanvas.style.display = "block";
-        var context = imageCanvas.getContext("2d");
-        context.clearRect(0, 0, imageCanvas.offsetWidth, imageCanvas.offsetHeight);    
 
-        var chartBackground = new Image(206,151);
+        context.clearRect(0, 0, imageCanvas.offsetWidth, imageCanvas.offsetHeight);
+
+        var chartBackground = new Image(206, 151);
         chartBackground.src = "images/graph_slideout.png";
 
         var chartImage = new Image();
 
         chartImage.onerror = function drawIntradayError() {
-            document.getElementById("graphMessage").innerHTML = "Chart not available";
-            //document.getElementById('graphDiv').style.visibility = "hidden";
-        }
+            graphMessageEl.innerHTML = "Chart not available";
+            //graphDivEl.style.visibility = "hidden";
+        };
 
         chartImage.onload = function drawIntradayImage() {
 
@@ -80,41 +61,15 @@ var ChartParser = function () {
             context.restore();
 
             // the graph is ready, stop displaying the message, show the graph and labels
-            document.getElementById("graphMessage").style.display = "none";
-            document.getElementById('graphDiv').style.visibility = "visible";
-        }
+            graphMessageEl.style.display = "none";
+            graphDivEl.style.visibility = "visible";
+        };
 
         chartImage.src = makeIntradayChartURL(stockCode);
     }
 
-    function makeIntradayChartURL(stockCode) {
-        //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm=" + Math.random();
-        var stockName = encodeURIComponent(stockCode);
-        var intradayChartURL = "http://ichart.yahoo.com/t?s=" + stockName + "&rndm=" + Math.random();
-        return intradayChartURL;
-    }
-
-    function parseChartRates(responseText)
-    {
-        // convert line breaks (windows & unix) to commas
-        responseText = responseText.replace(/(\r\n)|(\n)/gi,",");
- 
-        // split to array by commas
-        var arrayRates = responseText.split(",");
-
-        // floor -> only entire rows (last elements are line endings)
-        var arrayRatesRows = Math.floor(arrayRates.length / numberOfColumns);
-        
-        // only if response contains enough datapoints
-        if (arrayRatesRows > 5) {
-            // 0 -> dateColumn, 6 -> closevalueColumn
-            drawChart(arrayRates, arrayRatesRows, 0, 6);
-        }
-        else document.getElementById("graphMessage").innerHTML = "No data received.";
-    }
-
     function drawChart(arrayDateClose, numberOfRows, dateColumn, closeColumn) {
-        var canvas = document.getElementById("chartcanvas");
+        var canvas = chartCanvasEl;
         canvas.style.display = "block";
 
         // Margins
@@ -129,9 +84,12 @@ var ChartParser = function () {
             yMin = arrayDateClose[closeColumn + numberOfColumns], // +numberOfColumns -> from row 2
             yMax = arrayDateClose[closeColumn + numberOfColumns];
 
+        var i = 0,
+            j = 0;
+
         // Find minimum and maximum y(rate) value
-        for (var i = 2; i < numberOfRows; i++) { // from third row (0=first row)
-            var j = (i * numberOfColumns) + closeColumn; // select columns
+        for (i = 2; i < numberOfRows; i++) { // from third row (0=first row)
+            j = (i * numberOfColumns) + closeColumn; // select columns
             yMin = Math.min(arrayDateClose[j], yMin); // compare current columns with previous column
             yMax = Math.max(arrayDateClose[j], yMax);
         }
@@ -144,7 +102,7 @@ var ChartParser = function () {
         // the horizontal grid
         context.save();
         var yGridStep = canvasHeight / 4; // 4 - 1 = number of gridlines
-        for (var i = 1; i <= 3; i++) { // 3 = number of gridlines
+        for (i = 1; i <= 3; i++) { // 3 = number of gridlines
             context.moveTo(leftMargin, i * yGridStep + topMargin);
             context.lineTo(canvasWidth + leftMargin, i * yGridStep + topMargin);
         }
@@ -159,16 +117,17 @@ var ChartParser = function () {
         var horizontalLabels = [];
         var prevDate = arrayDateClose[(numberOfColumns + dateColumn)].split("-"); // from row 2, split: y-m-d -> y,m,d
         var nextDate = [];
-        for (var i = 2; i < numberOfRows; i++) { // from row three (0 = first row)
-            var j = (i * 7) + dateColumn;
+        var xCoord;
+        for (i = 2; i < numberOfRows; i++) { // from row three (0 = first row)
+            j = (i * 7) + dateColumn;
             nextDate = arrayDateClose[j].split("-"); // split: y-m-d -> y,m,d
             // if the y,m or d changes, it's time for a new gridline, but some are skipped
-            if (prevDate[horGridPeriod]!=nextDate[horGridPeriod]) { // compare according to: horGridPeriod = 0,1,2 -> y,m,d
+            if (prevDate[horGridPeriod] !== nextDate[horGridPeriod]) { // compare according to: horGridPeriod = 0,1,2 -> y,m,d
                 countXGrid++;
-                if (!(countXGrid % horGridSkip)) { // show every "horGridSKip" gridline, starting with the first
-                    var xCoord = Math.round(canvasWidth - (i - 1) * xStepSize + leftMargin);
+                if ((countXGrid % horGridSkip) === 0) { // show every "horGridSKip" gridline, starting with the first
+                    xCoord = Math.round(canvasWidth - (i - 1) * xStepSize + leftMargin);
                     context.moveTo(xCoord, topMargin); // 5 = margin
-                    context.lineTo(xCoord, canvasHeight+topMargin); // 5 = margin
+                    context.lineTo(xCoord, canvasHeight + topMargin); // 5 = margin
                     horizontalLabels.push(xCoord); // add the xCoord of the label
                     horizontalLabels.push(prevDate[horGridPeriod]); // add the label
                 }
@@ -181,32 +140,31 @@ var ChartParser = function () {
         context.restore();
 
         // array to change the monthnumber to the monthname
-        var monthLabels = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        
+        var monthLabels = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
         // function to return the last two digits of a four digit year
         function yearLabel(year) {
             return "'" + year.slice(year.length - 2);
         }
 
-        var xGrid = document.getElementById("horGrid");
+        var xGrid = horGridEl;
 
         // clear the horizontal grid labels
-        while (xGrid.hasChildNodes()) {
-            xGrid.removeChild(xGrid.lastChild);
-        }
-        
+        horGridEl.innerHTML = "";
+
         // add the horizontal grid labels
-        for (var i = 0; i < (horizontalLabels.length / 2); i++) {
+        for (i = 0; i < (horizontalLabels.length / 2); i++) {
             var addXGrid = document.createElement("div");
              // if the horGridPeriod is in months, change the monthnumber to the monthname
-            addXGrid.innerHTML = (horGridPeriod != 1) ? (horGridPeriod != 0) ? horizontalLabels[i * 2 + 1] : yearLabel(horizontalLabels[i * 2 + 1]) : monthLabels[parseFloat(horizontalLabels[(i * 2 + 1)])];
+            addXGrid.innerHTML = (horGridPeriod !== 1) ? (horGridPeriod !== 0) ? horizontalLabels[i * 2 + 1] : yearLabel(horizontalLabels[i * 2 + 1]) : monthLabels[parseFloat(horizontalLabels[(i * 2 + 1)])];
             addXGrid.setAttribute("id", "xGrid" + i);
             addXGrid.setAttribute("class", "horGridLabel");
             addXGrid.setAttribute("style", "left:" + horizontalLabels[i * 2] + "px;");
             xGrid.appendChild(addXGrid);
         }
 
-        // the actual graph 
+        // the actual graph
+
         context.save();
         context.lineWidth = 1;
         context.lineJoin = "round";
@@ -214,14 +172,20 @@ var ChartParser = function () {
         context.shadowBlur = 2;
         context.shadowOffsetY = 1;
         context.beginPath();
-        for (var i = 1; i < numberOfRows; i++) { // from row 2 (0 = first row)
-            var j = (i * 7) + closeColumn;
-            var xCoord = canvasWidth - (i - 1) * xStepSize + leftMargin;
-            var yCoord = canvasHeight - (arrayDateClose[j] - yMin) * yRatio + topMargin;
-            if (i == 1) context.moveTo(xCoord, yCoord);
-            else context.lineTo(xCoord, yCoord);
+        
+        var yCoord;
+        for (i = 1; i < numberOfRows; i++) { // from row 2 (0 = first row)
+            j = (i * 7) + closeColumn;
+            xCoord = canvasWidth - (i - 1) * xStepSize + leftMargin;
+            yCoord = canvasHeight - (arrayDateClose[j] - yMin) * yRatio + topMargin;
+            if (i === 1) {
+                context.moveTo(xCoord, yCoord);
+            }
+            else {
+                context.lineTo(xCoord, yCoord);
+            }
         }
-        context.strokeStyle = "#333333"
+        context.strokeStyle = "#333333";
         context.stroke();
         context.restore();
 
@@ -234,10 +198,31 @@ var ChartParser = function () {
         document.getElementById("vertGridLabel5").innerHTML = formatNumber(yMin, 2);
 
         // the graph is ready, stop displaying the message, show the graph and labels
-        document.getElementById("graphMessage").style.display = "none";
-        document.getElementById('horGrid').style.display = "block";
-        document.getElementById('vertGrid').style.display = "block";
-        document.getElementById('graphDiv').style.visibility = "visible";
+        graphMessageEl.style.display = "none";
+        horGridEl.style.display = "block";
+        vertGridEl.style.display = "block";
+        graphDivEl.style.visibility = "visible";
+    }
+
+    function parseChartRates(responseText)
+    {
+        // convert line breaks (windows & unix) to commas
+        responseText = responseText.replace(/(\r\n)|(\n)/gi,",");
+
+        // split to array by commas
+        var arrayRates = responseText.split(",");
+
+        // floor -> only entire rows (last elements are line endings)
+        var arrayRatesRows = Math.floor(arrayRates.length / numberOfColumns);
+
+        // only if response contains enough datapoints
+        if (arrayRatesRows > 5) {
+            // 0 -> dateColumn, 6 -> closevalueColumn
+            drawChart(arrayRates, arrayRatesRows, 0, 6);
+        }
+        else {
+            graphMessageEl.innerHTML = "No data received.";
+        }
     }
 
     function makeChartURL(chartPeriodInt, stockCode) {
@@ -284,7 +269,7 @@ var ChartParser = function () {
                 break;
             case 7: // 5y
                 timeDif = Math.round(day * 365 * 5);
-                resolution ="w";
+                resolution  = "w";
                 horGridPeriod = 0; // 0=year, 1=month, 2=day
                 horGridSkip = 1; // the number of gridlines to skip
                 break;
@@ -300,12 +285,39 @@ var ChartParser = function () {
         var fromDaysDay = fromDay.getDate();
         var stockName = encodeURIComponent(stockCode);
         //var debugChartURL = "http://localhost:8888/New Euro Stocks/table6.csv";
-        var chartURL = "http://ichart.yahoo.com/table.csv?s=" + stockName + "&d=" + todaysMonth + "&e=" + todaysDay + "&f=" + todaysYear + "&g=" + resolution + "&a=" + fromDaysMonth + "&b=" + fromDaysDay + "&c=" + fromDaysYear + "&ignore=.csv";
+        var chartURL = "http://ichart.yahoo.com/table.csv?s = " + stockName + "&d = " + todaysMonth + "&e = " + todaysDay + "&f = " + todaysYear + "&g = " + resolution + "&a = " + fromDaysMonth + "&b = " + fromDaysDay + "&c = " + fromDaysYear + "&ignore=.csv";
         return chartURL;
         //return debugChartURL;
-    }    
-
-    function formatNumber(number, decimals) {
-        return number.toFixed(2);
     }
+
+    self.requestChartRates = function (periodId, stockCode) {
+        graphMessageEl.innerHTML = "Requesting Chart";
+        graphMessageEl.style.display = "block";
+        chartCanvasEl.style.display = "none";
+        graphDivEl.style.visibility = "visible";
+        horGridEl.style.display = "none";
+        vertGridEl.style.display = "none";
+
+        rfTableDivEl.style.display = "none";
+
+        if (periodId === 1) {
+            drawIntradayChart(stockCode);
+        } else {
+            var reqChart = new XMLHttpRequest();
+            reqChart.onreadystatechange = function () {
+                if (reqChart.readyState === 4) {
+                    if (reqChart.status === 200) {
+                        parseChartRates(reqChart.responseText);
+                    } else {
+                        graphMessageEl.innerHTML = "Chart not available";
+                    }
+                }
+            };
+
+            reqChart.open("GET", makeChartURL(periodId, stockCode), true);
+            reqChart.setRequestHeader("Cache-Control", "no-cache");
+            reqChart.send(null);
+        }
+    };
+
 };

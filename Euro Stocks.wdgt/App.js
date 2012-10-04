@@ -1,10 +1,19 @@
 // Create local scope
 (function () {
     // feature checks
-    var hasDateLocaleString = typeof Date.toLocaleString === "function";
+    var hasDateLocaleString = typeof Date.toLocaleString === "function",
     
     // application-wide fields (state)
-    var showPercentage = ko.observable(false);
+        showPercentage = ko.observable(false),
+        isReady = false, // duplicate onload protection
+    
+    // constants
+        widgetSizes = {
+            WIDTH: 216,
+            BACKHEIGHT: 250,
+            STOCKHEIGHT: 31,
+            FRONTHEIGHT: 115
+        };
     
     function Stock(code, name, value, previousClose, updateDate) {
         var self = this;
@@ -20,8 +29,7 @@
         self.change = ko.computed(function () { // formatted
             if(showPercentage()) {
                 return ((self.value() - self.previousClose()) / self.previousClose() * 100).toFixed(2) + "%";
-            }
-            else {
+            } else {
                 return (self.value() - self.previousClose()).toFixed(2).toString();
             }
         });
@@ -39,7 +47,8 @@
                 code: self.code,
                 name: self.name,
                 value: self.value(),
-                previousClose: self.previousClose()
+                previousClose: self.previousClose(),
+                updateDate: self.updateDate()
             };
         };
     }
@@ -73,11 +82,11 @@
             // the original array, which is not good. Nope.
             var stocks = self.stocks().slice(0),
                 stockCodes = [];
-
+                
             for (var i = 0, len = stocks.length; i < len; i++) {
                 stockCodes.push(stocks[i].code);
             }
-
+            
             var rateParser = new RateParser();
             rateParser.requestStockRates(stockCodes, function (values) {
                 for (var i = 0, len = values.length; i < len; i++) {
@@ -96,7 +105,7 @@
             });
         };
     }
-        
+    
     function ChartViewModel(selectedStock) {
         if (typeof selectedStock != "function" || typeof selectedStock.subscribe != "function") {
             throw new Error("ChartViewModel: selectedStock is not an observable.");
@@ -115,39 +124,69 @@
         ];
         
         self.selectedPeriod = ko.observable(self.periods[1]);
+        self.graphSelected = ko.observable(true);
         
         self.isIndex = ko.computed(function () {
             return selectedStock().isIndex;
         });
         
-        self.switchToRisersFallers = function () {
-            self.graphSelected(false);
-
+        function updateRisersFallers() {
             var rfParser = new RisersFallersParser();
             rfParser.requestRisersFallers(selectedStock().code);
+        }
+        
+        function updateChart() {
+            var chartParser = new ChartParser();
+            chartParser.requestChartRates(self.selectedPeriod().id, selectedStock().code);        
+        }
+        
+        self.updateView = function () {
+            // If it is not an index or the chart is selected,
+            // update the chart.
+            if (!selectedStock().isIndex || self.graphSelected()) {
+                self.graphSelected(true);
+                updateChart();
+            }
+            // It is an index and the chart is not selected,
+            // hence update the Risers/Fallers.
+            else {
+                updateRisersFallers();
+            }
+        };
+        
+        self.switchToRisersFallers = function () {
+            if (selectedStock().isIndex) {
+                self.graphSelected(false);
+            }
+            self.updateView();
         };
         
         self.switchToGraph = function () {
             self.graphSelected(true);
-        };
-        
-        self.graphSelected = ko.observable(true);
-        
-        self.updateChart = function () {
-            var chartParser = new ChartParser();
-            chartParser.requestChartRates(self.selectedPeriod().id, selectedStock().code);        
+            self.updateView();
         };
         
         // Subscribe to the event when the selected period is updated.
         // Update the chart.
         self.selectedPeriod.subscribe(function () {
-            self.updateChart();
+            updateChart();
         });
+        
+        self.getPrefs = function () {
+            return {
+                period: self.selectedPeriod().id,
+                graphSelected: self.graphSelected()
+            };
+        };
     }
     
-    function PreferencesViewModel(stocks) {
+    function PreferencesViewModel(stocks, selectedStock) {
         if (typeof stocks != "function" || typeof stocks.subscribe != "function") {
             throw new Error("PreferencesViewModel: stocks is not an observable array.");
+        }
+        
+        if (typeof selectedStock != "function" || typeof selectedStock.subscribe != "function") {
+            throw new Error("PreferencesViewModel: selectedStock is not an observable.");
         }
         
         var self = this;
@@ -407,7 +446,16 @@
                 return;
             }
             
+            // Remember if the stock to be removed is selected.
+            var wasSelected = selectedStock() === stock;
+             
             self.stocks.remove(stock);
+            
+            // If the removed stock was selected, select
+            // the first stock.
+            if (wasSelected) {
+                selectedStock(stocks()[0]);
+            }
         };
         
         self.moveUp = function (stock) {
@@ -421,8 +469,6 @@
             // the original position.
             var removedStock = self.stocks.remove(stock);
             self.stocks.splice(index - 1, 0, removedStock[0]);
-            
-            console.log("move up: " + stock.code);
         };
         
         self.moveDown = function (stock) {
@@ -433,22 +479,20 @@
             }
             
             // Remove the stock and add it a position after
-            // the oringal position.
+            // the original position.
             var removedStock = self.stocks.remove(stock);
             self.stocks.splice(index + 1, 0, removedStock[0]);
-            
-            console.log("move down: " + stock.code);
         };
     }
     
     // Set up the actual viewmodel instances
     var stocksViewModel = new StocksViewModel();
     var chartViewModel = new ChartViewModel(stocksViewModel.selectedStock);
-    var preferencesViewModel = new PreferencesViewModel(stocksViewModel.stocks);
+    var preferencesViewModel = new PreferencesViewModel(stocksViewModel.stocks, stocksViewModel.selectedStock);
     
     function updateRatesAndChart() {
         stocksViewModel.updateRates();
-        chartViewModel.updateChart();
+        chartViewModel.updateView();
     }
     
     // Subscribe to the event when the selectedStock is updated.
@@ -459,6 +503,9 @@
     
     function showPrefs(frontEl, backEl) {
         if (window.widget) {
+            if (window.innerHeight < widgetSizes.BACKHEIGHT) {
+                window.resizeTo(widgetSizes.WIDTH, widgetSizes.BACKHEIGHT);
+            }
             widget.prepareForTransition("ToBack");
         }
 
@@ -513,12 +560,11 @@
     function bootstrapWidget() {
         if (window.widget) {
             
-            var backHeight = 250;
             // Subscribe to the number of stocks to update the window
             // height when it is a widget.
             stocksViewModel.stocks.subscribe(function (stock) {
-                var frontHeight = 115 + 31 * stocksViewModel.stocks().length;
-                window.resizeTo(216, Math.max(frontHeight, backHeight));
+                var frontHeight = widgetSizes.FRONTHEIGHT + widgetSizes.STOCKHEIGHT * stocksViewModel.stocks().length;
+                window.resizeTo(widgetSizes.WIDTH, Math.max(frontHeight, widgetSizes.BACKHEIGHT));
             });
             
             // When the widget is shown, update the rates and chart.
@@ -526,20 +572,86 @@
                 updateRatesAndChart();
             };
             
+            // Function to save the preferences when it is a widget.
+            // Uses JSON serialization to create preferences object.
+            function persistPreferences() {
+                widget.setPreferenceForKey(JSON.stringify(stocksViewModel.selectedStock().code), "selectedStock");
+                widget.setPreferenceForKey(JSON.stringify(stocksViewModel.stocks()), "stocks");
+                widget.setPreferenceForKey(JSON.stringify(chartViewModel.getPrefs()), "chart");
+                widget.setPreferenceForKey(preferencesViewModel.allowUpdateCheck(), "allowUpdateCheck");
+            }
+            
+            // Function to retrieve saved preferences at startup
+            // to initialize the widget.
+            function retrieveStartupPreferences() {
+                // TODO: retrieve preferences
+                var selectedStockPref = widget.preferenceForKey("selectedStock");
+                var stocksPref = widget.preferenceForKey("stocks");
+                var chartPrefs = widget.preferenceForKey("chart");
+                var allowUpdateCheckPref = widget.preferenceForKey("allowUpdateCheck");
+                
+                if (typeof stocksPref === "string") {
+                    try {
+                        var stocks = JSON.parse(stocksPref);
+                        if (stocks.length > 0) {
+                            stocksViewModel.stocks.removeAll();
+                            for (var i = 0, len = stocks.length; i < len; i++) {
+                                var stock = stocks[i];
+                                stocksViewModel.stocks.push()
+                            }
+                        }
+                    }
+                    catch (ex) {
+                        console.error("Error:" + ex.name + "\n" + ex.message)
+                    }
+                }
+                
+                if (typeof selectedStockPref === "string") {
+                    var stocks = stocksViewModel.stocks();
+                    for (var i = 0, len = stocks.length; i < len; i++) {
+                        if (stocks[i].code.toLowerCase() === selectedStockPref.toLowerCase()) {
+                            stocksViewModel.selectedStock(stocks[i]);
+                            break;
+                        }
+                    }
+                }
+                
+                if (typeof chartPrefs === "string") {
+                    try {
+                        var chartPrefObj = JSON.parse(chartPrefs);
+                        if (typeof chartPrefObj.period === "number") {
+                            chartViewModel.selectedPeriod(chartPrefObj.period);
+                        }
+                        if (typeof chartPrefObj.graphSelected === "boolean") {
+                            chartViewModel.graphSelected(chartPrefObj.graphSelected);
+                        }
+                    }
+                    catch (ex) {
+                        console.error("Error:" + ex.name + "\n" + ex.message)
+                    }
+                }
+                
+                if (typeof allowUpdateCheckPref === "boolean") {
+                    preferencesViewModel.allowUpdateCheck(allowUpdateCheckPref);
+                }
+            }
+            
         }
+        
+        // DEBUG: move this back into the if (window.widget) scope
+        stocksViewModel.stocks.subscribe(function (stocks) {
+            persistPreferences();
+        });
     }
     
     // DOMContentLoaded function that removes itself.
     function domContentLoaded() {
-        if (document.addEventListener) {
-            document.removeEventListener("DOMContentLoaded", domContentLoaded, false);
-            ready();
-        }
+        document.removeEventListener("DOMContentLoaded", domContentLoaded, false);
+        ready();
     }
     
     // Ready function for when the dom is loaded, with duplicate
     // execution protection.
-    var isReady = false;
     function ready() {
         // If this function has already been called before,
         // return.
@@ -547,17 +659,24 @@
             return;
         }
         isReady = true;
+        
+        // Remove event listener to self.
+        document.removeEventListener("load", ready, false);
+        
+        // Set up app/widget.
         bootstrapApp();
         bootstrapWidget();
+        
+        // Update the UI.
         updateRatesAndChart();
     }
     
     // Document ready handling based on jQuery 1.8.2
     if (document.addEventListener) {
-        // Use the handy event callback
+        // DOMContentLoaded should fire first.
         document.addEventListener("DOMContentLoaded", domContentLoaded, false);
         
-        // A fallback to window.onload, that will always work
+        // A fallback to window.onload, that will always work.
         window.addEventListener("load", ready, false);
     }
     

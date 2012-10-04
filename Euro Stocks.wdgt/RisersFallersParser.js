@@ -4,7 +4,11 @@
 // when you're literally copying and using the code, please refer to the author
 
 var RisersFallersParser = function () {
-    var self = this;
+    var self = this,
+        graphMessageEl = document.getElementById("graphMessage"),
+        graphDivEl = document.getElementById("graphDiv"),
+        rfTableDivEl = document.getElementById("rfTableDivEl"),
+        rfTableBodyEl = document.getElementById("rfTableBody");
     
     function makeRisersFallersURL(stockCode)
     {
@@ -26,10 +30,10 @@ var RisersFallersParser = function () {
             throw new Error("RisersFallersParser.requestRisersFallers: stockCode is not a string.")
         }
         
-        document.getElementById("graphMessage").innerHTML = "Requesting R/F data";
-        document.getElementById("graphMessage").style.display = "block";
+        graphMessageEl.innerHTML = "Requesting R/F data";
+        graphMessageEl.style.display = "block";
 
-        document.getElementById('graphDiv').style.visibility = "hidden";
+        graphDivEl.style.visibility = "hidden";
 
         var reqRF = new XMLHttpRequest();
         reqRF.onreadystatechange = function ()
@@ -42,8 +46,8 @@ var RisersFallersParser = function () {
                 }
                 else
                 {
-                    document.getElementById("graphMessage").innerHTML = "No R/F data available";
-                    document.getElementById('rfTableDiv').style.display = "none";            
+                    graphMessageEl.innerHTML = "No R/F data available";
+                    rfTableDivEl.style.display = "none";            
                 }
             }
         };
@@ -113,15 +117,13 @@ var RisersFallersParser = function () {
         });
         
         appendRF(arrayRisers, arrayFallers);
-        document.getElementById('rfTableDiv').style.display = "block";
+        rfTableDivEl.style.display = "block";
     }
 
     function appendRF(arrayRisers, arrayFallers)
     {
-        var output = document.getElementById("rfTableBody");
-        
         // Clear table body
-        output.innerHTML = "";
+        rfTableBodyEl.innerHTML = "";
 
         var maxArrayRFLength = Math.max(arrayRisers.length, arrayFallers.length);
         var maxDisplay = Math.min(7, maxArrayRFLength);
@@ -133,15 +135,15 @@ var RisersFallersParser = function () {
             else {
                 tableRow.setAttribute("class","oddRow");
             }
-            var riserNameCell = document.createElement('td');
-            var riserPercCell = document.createElement('td');
-            var fallerNameCell = document.createElement('td');
-            var fallerPercCell = document.createElement('td');
+            var riserNameCell = document.createElement('td'),
+                riserPercCell = document.createElement('td'),
+                fallerNameCell = document.createElement('td'),
+                fallerPercCell = document.createElement('td');
 
             if (i < arrayRisers.length) { // as long as Risers exist
                 riserNameCell.innerHTML = (typeof arrayRisers[i].name != "undefined") ? arrayRisers[i].name : "";
                 riserPercCell.innerHTML = (typeof arrayRisers[i].percentage != "undefined") ? formatNumber(arrayRisers[i].percentage, 2) + "%" : "";
-                if (arrayRisers[i].percentage == 0.0) {
+                if (arrayRisers[i].percentage === 0.0) {
                     riserPercCell.setAttribute("class", "noChange");
                 }
                 else {
@@ -152,7 +154,7 @@ var RisersFallersParser = function () {
             if (i < arrayFallers.length) { // as long as Fallers exist
                 fallerNameCell.innerHTML = (typeof arrayFallers[i].name != "undefined") ? arrayFallers[i].name : "";
                 fallerPercCell.innerHTML = (typeof arrayFallers[i].percentage != "undefined") ? formatNumber(arrayFallers[i].percentage, 2) + "%" : "";
-                if (arrayFallers[i].percentage == 0.0) {
+                if (arrayFallers[i].percentage === 0.0) {
                     fallerPercCell.setAttribute("class","noChange");
                 }
                 else {
@@ -165,10 +167,10 @@ var RisersFallersParser = function () {
             tableRow.appendChild(fallerNameCell);
             tableRow.appendChild(fallerPercCell);
 
-            output.appendChild(tableRow);
+            rfTableBodyEl.appendChild(tableRow);
         }
 
-        document.getElementById("graphMessage").style.display = "none";
+        graphMessageEl.style.display = "none";
     }    
     
     function formatNumber(number, decimals) {
