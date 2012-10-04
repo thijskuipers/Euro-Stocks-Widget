@@ -521,6 +521,18 @@
     
     function hidePrefs(frontEl, backEl) {
         if (window.widget) {
+
+            // Function to save the preferences when it is a widget.
+            // Uses JSON serialization to create preferences object.
+            function persistPreferences() {
+                widget.setPreferenceForKey(stocksViewModel.selectedStock().code, "selectedStock");
+                widget.setPreferenceForKey(JSON.stringify(stocksViewModel.stocks()), "stocks");
+                widget.setPreferenceForKey(JSON.stringify(chartViewModel.getPrefs()), "chart");
+                widget.setPreferenceForKey(preferencesViewModel.allowUpdateCheck(), "allowUpdateCheck");
+            }
+            
+            persistPreferences();
+            
             widget.prepareForTransition("ToFront");
         }
 
@@ -572,19 +584,19 @@
                 updateRatesAndChart();
             };
             
-            // Function to save the preferences when it is a widget.
-            // Uses JSON serialization to create preferences object.
-            function persistPreferences() {
-                widget.setPreferenceForKey(JSON.stringify(stocksViewModel.selectedStock().code), "selectedStock");
-                widget.setPreferenceForKey(JSON.stringify(stocksViewModel.stocks()), "stocks");
-                widget.setPreferenceForKey(JSON.stringify(chartViewModel.getPrefs()), "chart");
-                widget.setPreferenceForKey(preferencesViewModel.allowUpdateCheck(), "allowUpdateCheck");
+            function printCharCodes(s) {
+                var c = "";
+                for (var i = 0, len = s.length; i < len; i++) {
+                    c += s.charCodeAt(i) + ", ";
+                }
+                
+                console.log(s + ": " + c );
             }
             
             // Function to retrieve saved preferences at startup
             // to initialize the widget.
             function retrieveStartupPreferences() {
-                // TODO: retrieve preferences
+
                 var selectedStockPref = widget.preferenceForKey("selectedStock");
                 var stocksPref = widget.preferenceForKey("stocks");
                 var chartPrefs = widget.preferenceForKey("chart");
@@ -597,7 +609,7 @@
                             stocksViewModel.stocks.removeAll();
                             for (var i = 0, len = stocks.length; i < len; i++) {
                                 var stock = stocks[i];
-                                stocksViewModel.stocks.push()
+                                stocksViewModel.stocks.push(new Stock(stock.code, stock.name, stock.value, stock.previousClose, stock.updateDate));
                             }
                         }
                     }
@@ -620,7 +632,14 @@
                     try {
                         var chartPrefObj = JSON.parse(chartPrefs);
                         if (typeof chartPrefObj.period === "number") {
-                            chartViewModel.selectedPeriod(chartPrefObj.period);
+                            var periods = chartViewModel.periods;
+                            for (var i = 0, len = periods.length; i < len; i++) {
+                                var period = periods[i];
+                                if (period.id === chartPrefObj.period) {
+                                    chartViewModel.selectedPeriod(period);
+                                    break;
+                                }
+                            }
                         }
                         if (typeof chartPrefObj.graphSelected === "boolean") {
                             chartViewModel.graphSelected(chartPrefObj.graphSelected);
@@ -636,12 +655,8 @@
                 }
             }
             
+            retrieveStartupPreferences();
         }
-        
-        // DEBUG: move this back into the if (window.widget) scope
-        stocksViewModel.stocks.subscribe(function (stocks) {
-            persistPreferences();
-        });
     }
     
     // DOMContentLoaded function that removes itself.
