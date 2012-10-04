@@ -23,9 +23,9 @@ var ChartParser = function () {
     }
 
     function makeIntradayChartURL(stockCode) {
-        //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm = " + Math.random();
+        //var debugIntradayChartURL = "http://localhost:8888/YahooIntraDay/t.png?rndm=" + Math.random();
         var stockName = encodeURIComponent(stockCode);
-        var intradayChartURL = "http://ichart.yahoo.com/t?s = " + stockName + "&rndm = " + Math.random();
+        var intradayChartURL = "http://ichart.yahoo.com/t?s=" + stockName + "&rndm=" + Math.random();
         return intradayChartURL;
     }
 
@@ -285,7 +285,7 @@ var ChartParser = function () {
         var fromDaysDay = fromDay.getDate();
         var stockName = encodeURIComponent(stockCode);
         //var debugChartURL = "http://localhost:8888/New Euro Stocks/table6.csv";
-        var chartURL = "http://ichart.yahoo.com/table.csv?s = " + stockName + "&d = " + todaysMonth + "&e = " + todaysDay + "&f = " + todaysYear + "&g = " + resolution + "&a = " + fromDaysMonth + "&b = " + fromDaysDay + "&c = " + fromDaysYear + "&ignore=.csv";
+        var chartURL = "http://ichart.yahoo.com/table.csv?s=" + stockName + "&d=" + todaysMonth + "&e=" + todaysDay + "&f=" + todaysYear + "&g=" + resolution + "&a=" + fromDaysMonth + "&b=" + fromDaysDay + "&c=" + fromDaysYear + "&ignore=.csv";
         return chartURL;
         //return debugChartURL;
     }
